@@ -1,0 +1,1533 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daiwik Khedekar</title>
+<meta name="description" content="A personal website built as a working desktop: folders, notes, a terminal and a dock of links.">
+<style>
+/* Layout: full-screen desktop. Menu bar on top, icon grid down the right edge, widgets top-left, dock bottom-center, windows float above. One deliberate look (the wallpaper's daylight), so a single palette. */
+:root{
+  color-scheme: light;
+  --glass: rgba(246,248,252,.62);
+  --glass-strong: rgba(250,251,253,.86);
+  --glass-dark: rgba(30,34,44,.28);
+  --ink: #1d1f24;
+  --ink-2: #4b5160;
+  --ink-3: #8a90a0;
+  --line: rgba(20,30,50,.12);
+  --accent: #2f7cf6;
+  --select: rgba(47,124,246,.22);
+  --win: #fbfbfd;
+  --win-side: rgba(236,239,245,.82);
+  --term: #1b1d23;
+  --term-ink: #d8dee9;
+  --term-green: #8fd18b;
+  --term-blue: #7fb4ff;
+  --red:#ff5f57; --yellow:#febc2e; --green:#28c840;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  --mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --shadow-win: 0 0 0 .5px rgba(0,0,0,.18), 0 22px 70px rgba(10,20,40,.35), 0 6px 18px rgba(10,20,40,.18);
+}
+html,body{height:100%;overflow:hidden}
+body{background:#a9cdf2;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:default}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+#desktop{position:fixed;inset:0;background:#a9cdf2 url("wallpaper.webp") center/cover no-repeat;image-rendering:pixelated;overflow:hidden}
+#desktop::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 120%,rgba(0,0,0,.08),transparent 60%)}
+
+/* Menu bar */
+#menubar{position:fixed;top:0;left:0;right:0;height:28px;z-index:9000;display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px));
+  background:rgba(232,240,252,.42);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);
+  font-size:13px;color:#14161b;box-shadow:0 .5px 0 rgba(0,0,0,.08)}
+.mb-l,.mb-r{display:flex;align-items:center;gap:2px;height:100%}
+.mb-item{height:22px;padding:0 9px;border-radius:5px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.mb-item:hover,.mb-item.open{background:rgba(0,0,0,.1)}
+.mb-app{font-weight:700}
+.mb-logo svg{width:15px;height:15px}
+.mb-r .mb-item{padding:0 7px}
+.mb-r svg{width:17px;height:17px;display:block}
+#clock{font-variant-numeric:tabular-nums}
+.menu{position:fixed;top:27px;min-width:230px;padding:5px;border-radius:9px;z-index:9500;
+  background:var(--glass-strong);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);
+  box-shadow:0 0 0 .5px rgba(0,0,0,.2),0 12px 40px rgba(0,0,0,.22);font-size:13px;animation:menuIn .12s ease-out}
+@keyframes menuIn{from{opacity:0;transform:translateY(-3px)}}
+.menu button,.menu a{display:flex;justify-content:space-between;gap:24px;width:100%;padding:4px 10px;border-radius:5px;text-align:left;text-decoration:none}
+.menu button:hover,.menu a:hover{background:var(--accent);color:#fff}
+.menu button:hover kbd,.menu a:hover kbd{color:rgba(255,255,255,.85)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:5px 8px}
+.menu kbd{font-family:var(--font);color:var(--ink-3)}
+.menu .dis{color:var(--ink-3);pointer-events:none}
+
+/* Desktop icons */
+#icons{position:absolute;inset:28px 0 0 0}
+.icon{position:absolute;width:96px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px 4px;border-radius:8px;cursor:default;touch-action:none}
+.icon .art{width:64px;height:64px;display:grid;place-items:center;border-radius:8px;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.icon .art svg{overflow:visible;filter:drop-shadow(0 2px 3px rgba(0,30,70,.25))}
+.icon .label{font-size:12px;font-weight:500;color:#fff;text-align:center;line-height:1.25;padding:1px 5px;border-radius:4px;max-width:92px;
+  text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 6px rgba(0,0,0,.25);overflow-wrap:anywhere}
+.icon.sel .art{background:rgba(0,0,0,.18);box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+.icon.sel .label{background:var(--accent);text-shadow:none}
+.icon:hover .art{transform:scale(1.06)}
+.icon.burst .art{transform:scale(1.12)}
+.icon.dragging{opacity:.75;z-index:50}
+.folder-front{transform-box:fill-box;transform-origin:50% 100%;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.icon.burst .folder-front{transform:perspective(200px) rotateX(28deg) scaleY(.88)}
+.folder-paper{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.icon.burst .folder-paper{transform:translateY(-6px)}
+.tagdot{position:absolute;top:58px;right:22px;width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 1.5px #fff}
+
+/* Burst fan */
+#burst{position:fixed;inset:0;pointer-events:none;z-index:1500}
+.bcard{position:absolute;width:104px;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:5px;
+  opacity:0;transform:translate(var(--dx),var(--dy)) scale(.15) rotate(0deg);
+  transition:transform .55s cubic-bezier(.3,1.45,.55,1),opacity .25s ease;transition-delay:var(--d)}
+.bcard.out{opacity:1;transform:translate(0,0) scale(1) rotate(var(--r))}
+.bcard.back{transition-duration:.28s,.2s;transition-timing-function:cubic-bezier(.5,0,.75,0),ease;transition-delay:var(--d2)}
+.bcard .page{width:84px;height:106px;background:#fff;border-radius:3px;position:relative;overflow:hidden;
+  box-shadow:0 0 0 .5px rgba(0,0,0,.15),0 10px 24px rgba(10,30,60,.32);padding:9px 8px;font-size:6.4px;line-height:1.35;color:#333;text-align:left;transition:transform .2s ease}
+.bcard .page b{display:block;font-size:8px;margin-bottom:3px;color:#111}
+.bcard .page i{display:block;height:3px;background:#e4e7ee;border-radius:2px;margin:3px 0}
+.bcard .page::after{content:attr(data-ext);position:absolute;right:6px;bottom:6px;font:700 7px/1 var(--font);color:#fff;background:#6b7280;border-radius:3px;padding:2px 4px}
+.bcard .page.folder::after{background:var(--accent)}
+.bcard .page.link::after{background:#16a34a}
+.bcard .nm{font-size:11px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);max-width:104px;text-align:center;overflow-wrap:anywhere;line-height:1.2}
+.bcard:hover .page{transform:translateY(-6px) scale(1.06);box-shadow:0 0 0 2px var(--accent),0 16px 30px rgba(10,30,60,.38)}
+
+/* Quick look hover */
+#ql{position:fixed;z-index:1500;width:360px;max-height:440px;border-radius:14px;overflow:hidden;pointer-events:auto;
+  background:var(--glass-strong);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);
+  box-shadow:var(--shadow-win);opacity:0;transform-origin:var(--ox) var(--oy);transform:scale(.2);
+  transition:transform .45s cubic-bezier(.3,1.4,.55,1),opacity .2s ease}
+#ql.on{opacity:1;transform:scale(1)}
+#ql .qlbar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink-2)}
+#ql .qlbar span{font-weight:400;color:var(--ink-3)}
+#ql .qlbody{padding:14px 20px 20px;max-height:390px;overflow:hidden;font-size:12.5px;-webkit-mask-image:linear-gradient(#000 80%,transparent);mask-image:linear-gradient(#000 80%,transparent)}
+
+/* Widgets (shared by the desktop and the phone home screen) */
+#widgets{position:absolute;top:44px;left:max(20px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:repeat(2,164px);gap:16px;z-index:5;align-items:start}
+.wg{position:relative;display:block;overflow:hidden;border-radius:22px;color:#1c1c1e;text-decoration:none;text-align:left;padding:0;
+  background:rgba(255,255,255,.8);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);
+  box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 12px 32px rgba(20,50,90,.2);font-family:var(--font);transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+a.wg:hover,button.wg:hover{transform:scale(1.025)}
+.wg.sm{aspect-ratio:1}
+.wg.wide{grid-column:span 2}
+.wg-photo{width:100%;background:#c9d3e0 center 30%/cover no-repeat;cursor:pointer}
+.wg-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 42%,rgba(0,0,0,.6))}
+.wg-photo .cap{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;color:#fff;display:grid;gap:2px}
+.wg-photo b{font:700 15px/1.15 var(--font-display)}
+.wg-photo span{font-size:11.5px;opacity:.88}
+.wg-clock{background:#1c1c1e;display:grid;place-items:center}
+.dial{width:86%;aspect-ratio:1;border-radius:50%;background:#fff;position:relative;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.dial .num{position:absolute;font:600 11px/1 var(--font-display);color:#1c1c1e;transform:translate(-50%,-50%)}
+.hand{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;border-radius:4px}
+.hand.hr{width:5px;height:24%;margin-left:-2.5px;background:#1c1c1e}
+.hand.mn{width:3.5px;height:36%;margin-left:-1.75px;background:#1c1c1e}
+.hand.sc{width:1.5px;height:42%;margin-left:-.75px;background:#ff9500}
+.dial .pin{position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:#ff9500;box-shadow:inset 0 0 0 1.5px #fff}
+.wg-cal{padding:13px 11px}
+.wg-cal .cm{font:700 11px/1 var(--font);color:#ff3b30;letter-spacing:.04em;text-transform:uppercase;margin:0 0 6px 4px}
+.wg-cal .cg{display:grid;grid-template-columns:repeat(7,1fr);row-gap:1px;text-align:center;font:600 9.5px/17px var(--font);font-variant-numeric:tabular-nums}
+.wg-cal i{font-style:normal}
+.wg-cal .dh{color:#8e8e93}
+.wg-cal .we{color:#8e8e93}
+.wg-cal .td{background:#ff3b30;color:#fff;border-radius:50%;width:17px;margin:0 auto}
+.wg-pythe{padding:14px;display:flex;flex-direction:column;background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(233,237,243,.92))}
+.wg-pythe img{width:48px;height:48px;object-fit:contain;margin:-4px 0 0 -4px}
+.wg-pythe b{font:700 16px/1.1 var(--font-display);margin-top:auto}
+.wg-pythe span{font-size:11px;color:#6b7280;line-height:1.3;margin-top:2px}
+.wg-pythe em{font-style:normal;font-size:11px;font-weight:600;color:#007aff;margin-top:6px}
+.wg-rem{padding:14px 16px 8px;background:rgba(255,255,255,.88)}
+.wg-rem .rh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.wg-rem .ri{width:26px;height:26px;border-radius:50%;background:#007aff;display:grid;place-items:center;flex:none}
+.wg-rem .ri svg{width:14px;height:14px}
+.wg-rem .rh b{font:700 14px/1 var(--font-display);color:#007aff;flex:1}
+.wg-rem .rc{font:700 22px/1 var(--font-display);color:#1c1c1e;font-variant-numeric:tabular-nums}
+.wg-rem ul{list-style:none;margin:0;padding:0}
+.wg-rem li{display:flex;align-items:center;gap:9px;padding:6px 0;border-top:.5px solid rgba(0,0,0,.1);font-size:12.5px;line-height:1.25}
+.wg-rem li.sec{font:600 10.5px/1 var(--font);color:#8e8e93;text-transform:uppercase;letter-spacing:.05em;padding:10px 0 3px;border:0}
+.wg-rem .rk{width:17px;height:17px;flex:none;border-radius:50%;border:1.5px solid #c7c7cc;padding:0;cursor:pointer;transition:background .2s,border-color .2s}
+.wg-rem li.done .rk{background:#007aff;border-color:#007aff;box-shadow:inset 0 0 0 2.5px #fff}
+.wg-rem li.done span{color:#8e8e93}
+.wg-rem li span{flex:1;min-width:0}
+.wg-rem em{font-style:normal;font-size:10px;font-weight:600;color:#ff9500;background:rgba(255,149,0,.13);padding:2px 6px;border-radius:6px;flex:none}
+@media (max-height:780px){#widgets .wg-cal,#widgets .wg-pythe{display:none}}
+.pyico{display:grid;place-items:center;width:100%;height:100%;background:linear-gradient(#fff,#eceff4);border-radius:22%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12)}
+.pyico img{width:82%;height:82%;object-fit:contain}
+#spot li .mi .pyico{width:24px;height:24px}
+
+/* Phone home screen */
+#mobile{display:none;position:fixed;inset:0;flex-direction:column;background:#a9cdf2 url("wallpaper.webp") 38% center/cover no-repeat;image-rendering:pixelated;overflow:hidden;z-index:1}
+body.mobile #mobile{display:flex}
+body.mobile #desktop,body.mobile #menubar,body.mobile #dockwrap,body.mobile #windows,body.mobile #burst,body.mobile #ql,body.mobile .notif,body.mobile #marquee,body.mobile .menu{display:none!important}
+.m-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 28px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 130px) max(20px,env(safe-area-inset-left,0px))}
+.m-head{max-width:400px;margin:0 auto 18px;color:#fff;text-shadow:0 1px 6px rgba(0,30,70,.35)}
+.m-head small{font:600 14px/1 var(--font);opacity:.9}
+.m-head h1{margin:4px 0 0;font:700 34px/1.05 var(--font-display);letter-spacing:-.02em}
+.m-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 14px;max-width:400px;margin:0 auto}
+.m-grid .wg.sm{grid-column:span 2}
+.m-grid .wg.wide{grid-column:span 4}
+.m-grid .wg{image-rendering:auto}
+.m-app{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:#fff;min-width:0;padding:0;-webkit-tap-highlight-color:transparent;image-rendering:auto}
+.m-app .mi{box-sizing:border-box;width:100%;max-width:62px;aspect-ratio:1;border-radius:23%;overflow:hidden;display:block;box-shadow:0 4px 12px rgba(0,30,70,.22);transition:transform .15s ease}
+.m-app .mi svg{width:100%;height:100%;display:block}
+.m-app:active .mi{transform:scale(.88)}
+.m-app>span:last-child{font-size:11.5px;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.6);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-fold{background:rgba(255,255,255,.38);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:grid!important;grid-template-columns:repeat(3,1fr);align-content:start;gap:7%;padding:14%}
+.m-fold i{aspect-ratio:1;border-radius:24%;background:#fff center/cover no-repeat;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.m-md{background:#fff;position:relative;padding:20% 18%}
+.m-md i{display:block;height:6%;min-height:3px;border-radius:2px;background:#dfe3ea;margin-bottom:9%}
+.m-md i:first-child{width:70%;background:#c3cad6}
+.m-md b{position:absolute;right:12%;bottom:12%;font:800 10px/1 var(--font);color:#fff;background:#4b5563;border-radius:4px;padding:3px 4px}
+.m-thumb{background:#fff center/cover no-repeat}
+.m-dock{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);width:min(400px,calc(100vw - 24px));height:88px;border-radius:34px;
+  display:grid;grid-template-columns:repeat(4,1fr);place-items:center;padding:0 14px;background:rgba(255,255,255,.3);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.5)}
+.m-dock .m-app .mi{width:62px}
+#mfold{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:0 20px;background:rgba(30,50,80,.22);backdrop-filter:blur(28px) saturate(1.4);-webkit-backdrop-filter:blur(28px) saturate(1.4)}
+#mfold h2{margin:0;color:#fff;font:700 30px/1.1 var(--font-display);text-shadow:0 1px 8px rgba(0,0,0,.3)}
+#mfold .panel{width:min(340px,100%);border-radius:38px;padding:24px 18px;background:rgba(255,255,255,.32);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px 12px}
+#msheet{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.32);display:flex;align-items:flex-end}
+#msheet .card{width:100%;height:calc(100% - env(safe-area-inset-top,0px) - 14px);background:#fff;border-radius:14px 14px 0 0;display:flex;flex-direction:column;overflow:hidden}
+#msheet .bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 12px;border-bottom:.5px solid rgba(0,0,0,.12);touch-action:none}
+#msheet .grab{position:absolute;top:6px;left:50%;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:#d1d1d6}
+#msheet .bar b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#msheet .done{color:#007aff;font-weight:600;font-size:16px;padding:4px 0}
+#msheet .md{padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 40px);font-size:15px}
+
+/* Dock */
+#dockwrap{position:fixed;left:0;right:0;bottom:max(6px,env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:8000;pointer-events:none}
+#dock{pointer-events:auto;display:flex;align-items:flex-end;gap:0;padding:5px 6px;border-radius:22px;
+  background:rgba(240,246,255,.32);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.55) inset,0 0 0 .5px rgba(0,0,0,.15),0 10px 30px rgba(10,30,60,.2)}
+.dk{--s:52px;width:var(--s);height:var(--s);position:relative;flex:none;margin:0 2px;display:block;text-decoration:none;transition:width .12s ease,height .12s ease}
+#dock.live .dk{transition:none}
+.dk .ico{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 5px rgba(0,0,0,.22))}
+.dk .ico svg{width:100%;height:100%;display:block}
+.dk.bounce .ico{animation:bounce .9s cubic-bezier(.3,0,.4,1) 2}
+@keyframes bounce{0%,100%{transform:translateY(0)}35%{transform:translateY(-34%)}55%{transform:translateY(0)}72%{transform:translateY(-10%)}86%{transform:translateY(0)}}
+.dk .tip{position:absolute;left:50%;bottom:calc(100% + 14px);transform:translateX(-50%);white-space:nowrap;padding:4px 10px;border-radius:7px;font-size:13px;
+  background:rgba(240,242,246,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#1d1f24;box-shadow:0 0 0 .5px rgba(0,0,0,.2),0 4px 14px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .12s}
+.dk .tip::after{content:"";position:absolute;left:50%;top:100%;margin-left:-6px;border:6px solid transparent;border-top-color:rgba(240,242,246,.88)}
+.dk:hover .tip,.dk:focus-visible .tip{opacity:1}
+.dk .dot{position:absolute;left:50%;bottom:-4px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:rgba(20,25,35,.75);opacity:0;transition:opacity .2s}
+.dk.running .dot{opacity:1}
+.dsep{width:1px;align-self:stretch;margin:4px 6px;background:rgba(0,0,0,.18)}
+.dk.mini .ico{border-radius:6px;overflow:hidden;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.2)}
+.dk.mini .ico .mt{padding:5px;font:700 7px/1.2 var(--font);color:#333;text-align:left}
+
+/* Windows */
+#windows{position:fixed;inset:0;pointer-events:none;z-index:1000}
+.win{position:absolute;pointer-events:auto;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--win);box-shadow:var(--shadow-win);min-width:320px;min-height:200px}
+.win.blur{box-shadow:0 0 0 .5px rgba(0,0,0,.15),0 12px 40px rgba(10,20,40,.22)}
+.win.max{border-radius:0}
+.tbar{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid var(--line);background:linear-gradient(#f6f7f9,#eceef2);cursor:default;touch-action:none}
+.tbar .ttl{flex:1;text-align:center;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:52px}
+.lights{display:flex;gap:8px}
+.lights button{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 .5px rgba(0,0,0,.15) inset;display:grid;place-items:center;padding:0}
+.lights .c{background:var(--red)} .lights .m{background:var(--yellow)} .lights .x{background:var(--green)}
+.lights svg{width:8px;height:8px;opacity:0;stroke:rgba(0,0,0,.55);stroke-width:1.6;fill:none}
+.lights:hover svg{opacity:1}
+.win.blur .lights button{background:#d6d7db}
+.win.blur .lights:hover .c{background:var(--red)}.win.blur .lights:hover .m{background:var(--yellow)}.win.blur .lights:hover .x{background:var(--green)}
+.wbody{flex:1;min-height:0;display:flex;position:relative}
+.rsz{position:absolute;right:0;bottom:0;width:16px;height:16px;cursor:nwse-resize;touch-action:none;z-index:2}
+
+/* Finder */
+.fside{width:180px;flex:none;background:var(--win-side);border-right:1px solid var(--line);padding:10px 8px;overflow:auto;font-size:13px}
+.fside h5{margin:12px 8px 4px;font:600 11px/1 var(--font);color:var(--ink-3)}
+.fside h5:first-child{margin-top:2px}
+.fside button{display:flex;align-items:center;gap:8px;width:100%;padding:4px 8px;border-radius:6px;text-align:left}
+.fside button:hover{background:rgba(0,0,0,.05)}
+.fside button.on{background:rgba(0,0,0,.09)}
+.fside svg{width:16px;height:16px;flex:none;color:var(--accent)}
+.fside .tg{width:10px;height:10px;border-radius:50%;flex:none}
+.fmain{flex:1;min-width:0;display:flex;flex-direction:column}
+.fgrid{flex:1;overflow:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));align-content:start;gap:8px}
+.fitem{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:8px;text-align:center;font-size:12px;line-height:1.25}
+.fitem:hover{background:rgba(0,0,0,.04)}
+.fitem.sel{background:var(--select)}
+.fitem .art{height:58px;display:grid;place-items:center}
+.fitem span{overflow-wrap:anywhere}
+.fpath{height:26px;flex:none;border-top:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11px;color:var(--ink-3);background:#f6f7f9}
+.fnav{display:flex;gap:2px}
+.fnav button{width:28px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--ink-2)}
+.fnav button:hover{background:rgba(0,0,0,.06)}
+.fnav button:disabled{opacity:.35}
+.fnav svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* Markdown viewer */
+.mdwrap{flex:1;overflow:auto;background:#fff;user-select:text;-webkit-user-select:text}
+.mdwrap.raw pre.src{display:block}
+.mdwrap.raw article{display:none}
+pre.src{display:none;margin:0;padding:28px 34px;font:12.5px/1.6 var(--mono);white-space:pre-wrap;color:#384152}
+.mdtools{display:flex;gap:2px;background:rgba(0,0,0,.06);border-radius:7px;padding:2px}
+.mdtools button{font-size:11.5px;padding:2px 9px;border-radius:5px;color:var(--ink-2)}
+.mdtools button.on{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12);color:var(--ink)}
+.md{max-width:64ch;margin:0 auto;padding:30px 34px 50px;font-size:14.5px;line-height:1.65;color:#262a33}
+.md h1{font:700 28px/1.2 var(--font-display);letter-spacing:-.015em;margin:0 0 6px;text-wrap:balance;color:#111}
+.md h2{font:650 18px/1.3 var(--font-display);margin:28px 0 8px;padding-bottom:6px;border-bottom:1px solid #eceef2;color:#111}
+.md h3{font:600 15px/1.35 var(--font);margin:20px 0 4px;color:#111}
+.md p{margin:0 0 12px}
+.md ul,.md ol{margin:0 0 12px;padding-left:22px}
+.md li{margin:3px 0}
+.md code{font:12.5px var(--mono);background:#f2f4f7;padding:1px 5px;border-radius:4px;color:#b4235a}
+.md pre{background:#f6f8fa;border-radius:8px;padding:12px 14px;overflow:auto;font:12.5px/1.55 var(--mono);margin:0 0 14px}
+.md pre code{background:none;padding:0;color:#24292f}
+.md blockquote{margin:0 0 14px;padding:4px 14px;border-left:3px solid #c8d3e6;color:#55607a}
+.md hr{border:0;border-top:1px solid #eceef2;margin:22px 0}
+.md a{color:var(--accent);text-decoration:none}
+.md img{display:block;width:100%;height:auto;border-radius:10px;margin:4px 0 16px;box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 6px 20px rgba(10,20,40,.12)}
+.md a:hover{text-decoration:underline}
+.md img.logo{width:120px;box-shadow:none;border-radius:0}
+.md .meta{color:var(--ink-3);font-size:12.5px;margin-bottom:18px}
+#ql .md{padding:0;font-size:12.5px;max-width:none}
+#ql .md h1{font-size:20px}
+#ql .md h2{font-size:14px;margin-top:14px}
+
+/* Terminal */
+.term{flex:1;overflow:auto;background:var(--term);color:var(--term-ink);font:12.5px/1.5 var(--mono);padding:10px 12px;user-select:text;-webkit-user-select:text}
+.term .ln{white-space:pre-wrap;overflow-wrap:anywhere}
+.term .pr{color:var(--term-green)} .term .dir{color:var(--term-blue)} .term .err{color:#ff8b8b} .term .dim{color:#7d8597}
+.term .inrow{display:flex}
+.term input{flex:1;background:none;border:0;outline:0;color:var(--term-ink);font:inherit;padding:0 0 0 7px;caret-color:#d8dee9}
+.win.terminal .tbar{background:#2a2d35;border-bottom-color:#111}
+.win.terminal .ttl{color:#b5bccb}
+
+/* About */
+.about{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:24px;text-align:center;background:linear-gradient(#f7f8fb,#eef1f6)}
+.about .av{width:96px;height:96px;border-radius:50%;background:#dde3ec center 20%/cover no-repeat;box-shadow:0 0 0 3px #fff,0 6px 18px rgba(0,0,0,.18);margin-bottom:8px;image-rendering:pixelated}
+.about h2{margin:0;font:700 22px/1.2 var(--font-display)}
+.about p{margin:0;color:var(--ink-2);font-size:12.5px}
+.about dl{display:grid;grid-template-columns:auto auto;gap:3px 12px;font-size:12px;margin:12px 0 0;text-align:left}
+.about dt{color:var(--ink-3);text-align:right}
+.about dd{margin:0}
+
+/* Spotlight */
+#spot{position:fixed;inset:0;z-index:9600;display:flex;justify-content:center;padding-top:18vh;background:rgba(0,0,0,.02)}
+#spot .box{width:min(640px,calc(100vw - 32px));border-radius:16px;background:var(--glass-strong);backdrop-filter:blur(50px) saturate(1.8);-webkit-backdrop-filter:blur(50px) saturate(1.8);
+  box-shadow:0 0 0 .5px rgba(0,0,0,.2),0 30px 80px rgba(0,0,0,.3);overflow:hidden;align-self:flex-start;animation:spotIn .18s cubic-bezier(.3,1.3,.5,1)}
+@keyframes spotIn{from{opacity:0;transform:scale(.96)}}
+#spot .row{display:flex;align-items:center;gap:10px;padding:12px 16px}
+#spot .row svg{width:22px;height:22px;color:var(--ink-3)}
+#spot input{flex:1;border:0;outline:0;background:none;font:400 22px/1.2 var(--font-display);color:var(--ink)}
+#spot ul{list-style:none;margin:0;padding:6px;border-top:1px solid var(--line);max-height:340px;overflow:auto}
+#spot li{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;font-size:13.5px}
+#spot li small{margin-left:auto;color:var(--ink-3);font-size:11.5px}
+#spot li.on{background:var(--accent);color:#fff}
+#spot li.on small{color:rgba(255,255,255,.8)}
+#spot li .mi{width:24px;height:24px;display:grid;place-items:center;flex:none}
+#spot li .mi svg{max-width:24px;max-height:24px}
+
+/* Notification */
+.notif{position:fixed;top:38px;right:max(12px,env(safe-area-inset-right,0px));width:340px;max-width:calc(100vw - 24px);z-index:9400;display:flex;gap:10px;padding:12px 14px;border-radius:16px;
+  background:var(--glass-strong);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);box-shadow:0 0 0 .5px rgba(0,0,0,.15),0 10px 30px rgba(0,0,0,.18);
+  animation:nIn .5s cubic-bezier(.3,1.3,.5,1);font-size:13px}
+.notif.bye{animation:nOut .35s ease forwards}
+@keyframes nIn{from{transform:translateX(120%)}}
+@keyframes nOut{to{transform:translateX(120%);opacity:0}}
+.notif .ni{width:36px;height:36px;flex:none}
+.notif b{display:block;font-size:13px}
+.notif p{margin:2px 0 0;color:var(--ink-2);line-height:1.35}
+.notif small{position:absolute;top:12px;right:14px;color:var(--ink-3);font-size:11px}
+
+#marquee{position:fixed;border:1px solid rgba(80,140,240,.8);background:rgba(80,140,240,.18);z-index:300;pointer-events:none;display:none}
+
+@media (max-width:760px){
+  #widgets{display:none}
+  .icon{width:84px}.icon .art{width:56px;height:56px}.icon .art svg{transform:scale(.88)}
+  .mb-hide{display:none}
+  .fside{display:none}
+  #ql{width:calc(100vw - 32px)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;transition-delay:0s!important}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gFolderBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5eb6f2"/><stop offset="1" stop-color="#2f8fdc"/></linearGradient>
+    <linearGradient id="gFolderFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9cdafe"/><stop offset="1" stop-color="#55b2f0"/></linearGradient>
+    <linearGradient id="gFinder" x1="0" y1="0" x2="1" y2="0"><stop offset=".5" stop-color="#1e8cf0"/><stop offset=".5" stop-color="#e9f3fd"/></linearGradient>
+    <linearGradient id="gIg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#feda75"/><stop offset=".3" stop-color="#fa7e1e"/><stop offset=".6" stop-color="#d62976"/><stop offset="1" stop-color="#4f5bd5"/></linearGradient>
+    <linearGradient id="gPythe" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfe6ff"/><stop offset=".55" stop-color="#8fbff5"/><stop offset="1" stop-color="#4a8fe0"/></linearGradient>
+    <linearGradient id="gGlass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f6fa"/><stop offset="1" stop-color="#c9d0da"/></linearGradient>
+  </defs>
+</svg>
+
+<div id="desktop">
+  <div id="widgets" aria-label="Widgets"></div>
+  <div id="icons"></div>
+</div>
+<div id="marquee"></div>
+<div id="burst"></div>
+<div id="windows"></div>
+
+<div id="mobile" aria-label="Home Screen"><div class="m-scroll"><div class="m-head"><small id="mHello"></small><h1>Daiwik Khedekar</h1></div><div class="m-grid" id="mGrid"></div></div><nav class="m-dock" id="mDock" aria-label="Dock"></nav></div>
+
+<header id="menubar">
+  <nav class="mb-l">
+    <button class="mb-item mb-logo" data-menu="apple" aria-label="Site menu"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="#14161b" stroke-width="1.6"/><path d="M5 9.6c1.6 1.6 4.4 1.6 6 0" fill="none" stroke="#14161b" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="6.4" r="1" fill="#14161b"/><circle cx="10" cy="6.4" r="1" fill="#14161b"/></svg></button>
+    <button class="mb-item mb-app" id="appName" data-menu="app">Finder</button>
+    <button class="mb-item" data-menu="file">File</button>
+    <button class="mb-item mb-hide" data-menu="view">View</button>
+    <button class="mb-item" data-menu="go">Go</button>
+    <button class="mb-item mb-hide" data-menu="window">Window</button>
+    <button class="mb-item mb-hide" data-menu="help">Help</button>
+  </nav>
+  <div class="mb-r">
+    <span class="mb-item mb-hide" aria-label="Battery 86%"><svg viewBox="0 0 28 14" style="width:26px"><rect x=".75" y=".75" width="23" height="12.5" rx="3.5" fill="none" stroke="#14161b" stroke-opacity=".45" stroke-width="1.2"/><rect x="2.5" y="2.5" width="17" height="9" rx="2" fill="#14161b"/><path d="M25.6 5v4c.9-.3 1.4-1.1 1.4-2s-.5-1.7-1.4-2z" fill="#14161b" fill-opacity=".45"/></svg></span>
+    <span class="mb-item mb-hide" aria-label="Wi-Fi"><svg viewBox="0 0 20 16"><path d="M10 13.6l2.1-2.3a3 3 0 0 0-4.2 0z" fill="#14161b"/><path d="M5.6 9a6.3 6.3 0 0 1 8.8 0l1.5-1.6a8.5 8.5 0 0 0-11.8 0z" fill="#14161b"/><path d="M2.4 5.6a10.9 10.9 0 0 1 15.2 0l1.5-1.6a13.1 13.1 0 0 0-18.2 0z" fill="#14161b"/></svg></span>
+    <button class="mb-item" id="spotBtn" aria-label="Search"><svg viewBox="0 0 16 16"><circle cx="6.8" cy="6.8" r="4.8" fill="none" stroke="#14161b" stroke-width="1.7"/><path d="M10.4 10.4l3.6 3.6" stroke="#14161b" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    <span class="mb-item mb-hide" aria-label="Control Center"><svg viewBox="0 0 18 16"><rect x="1" y="2" width="16" height="5" rx="2.5" fill="none" stroke="#14161b" stroke-width="1.3"/><circle cx="13.5" cy="4.5" r="1.6" fill="#14161b"/><rect x="1" y="9" width="16" height="5" rx="2.5" fill="none" stroke="#14161b" stroke-width="1.3"/><circle cx="4.5" cy="11.5" r="1.6" fill="#14161b"/></svg></span>
+    <span class="mb-item" id="clock"></span>
+  </div>
+</header>
+
+<div id="dockwrap"><nav id="dock" aria-label="Dock"></nav></div>
+
+<script>
+/* ============ Edit me: profile, links and every file on the desktop ============ */
+const PROFILE = {
+  name: "Daiwik Khedekar",
+  short: "Daiwik",
+  title: "ceo @ pythe · 16",
+  photo: "img/me.jpg",
+  logo: "img/pythe-logo.webp",
+  links: {
+    pythe: "https://www.pythe.app",
+    linkedin: "https://www.linkedin.com/in/daiwik-khedekar",
+    instagram: "https://www.instagram.com/dwk.z",
+    github: "https://github.com/dkhedekar79",
+    x: "https://x.com/daiwikbuilds",
+    email: "daiwik@pythe.app"
+  }
+};
+
+const FOLDERS = {
+  projects: { name: "Projects", tag: "#2f7cf6", files: [
+    { name: "Pythe.md", md: `# pythe
+<div class="meta">ceo · co-founded with abhi · [pythe.app](https://www.pythe.app)</div>
+
+![Pythe dashboard](img/pythe-hero.webp)
+
+**your ai cofounder with a team of ai agents to build anything**
+
+me and abhi came into startups through vibecoding like loads of people
+
+building was never the hard part. knowing what to do next was
+
+so we built the thing we needed
+
+## how it works
+1. tell pythe what youre building. a link, a repo, a few notes, whatever
+2. it writes up your company and researches the market
+3. you get a ranked, stage-aware roadmap
+4. pytheus (the ai cofounder) hands the tasks to six agents: researcher, writer, engineer, analyst, outreach and operator. each one gets its own cloud computer
+5. nothing leaves pythe without your yes
+
+## plugs into
+github, slack, gmail, hubspot, notion, stripe, posthog. and claude, claude code, cursor, codex and chatgpt
+
+## pricing
+free, base at £29/mo, premium at £79/mo. 3 day free trial
+
+we also wrote a 60 page founder's growth playbook and gave it away for free. no email, no gate
+
+-dk` },
+    { name: "Black Box.md", md: `# black box
+<div class="meta">the flight recorder for ai agents · [tryblackbox.dev](https://tryblackbox.dev)</div>
+
+![Black Box](img/blackbox.jpg)
+
+when an ai agent goes wrong, can you prove what it actually did?
+
+usually no
+
+the logs are scattered everywhere
+
+the agent's own trace is literally the thing under review
+
+and anyone with access can quietly edit the record
+
+## so black box
+- sits at a gateway outside the agent
+- records every model call and tool call
+- seals every entry in a sha-256 hash chain
+- change one entry and the whole chain breaks
+- anyone can verify the log offline
+
+built for teams shipping agents, and the insurers covering them
+
+theres a live tamper test on the site. go try break it
+
+-dk` },
+    { name: "Trackviso.md", md: `# trackviso
+<div class="meta">gamified study tracker · [trackviso.vercel.app](https://trackviso.vercel.app)</div>
+
+![Trackviso](img/trackviso.webp)
+
+revision but it feels like a game
+
+- tracks every minute you study
+- analytics so you can see where the time actually goes
+- an ai study tutor
+- xp for showing up
+
+-dk` },
+    { name: "Creddr.md", md: `# creddr
+<div class="meta">[creddr.uk](https://creddr.uk)</div>
+
+![Creddr](img/creddr.webp)
+
+**jumpstart your finance career from zero**
+
+for people with zero finance background who want a first finance role
+
+starting with the hardest one to break into: private equity
+
+open beta, waitlist open
+
+-dk` },
+    { name: "Krzna LDN.md", md: `# krzna ldn
+<div class="meta">the clothing brand · started at 13</div>
+
+![Krzna logo](img/krzna.webp)
+
+my first company
+
+i was 13
+
+hand drew the logo myself
+
+it made five figures and i genuinely thought i had cracked business forever
+
+i had not
+
+but it taught me the thing i still believe now: the product is half of it, selling it is the other half
+
+-dk` }
+  ]},
+  portfolio: { name: "Cool Portfolio Stuff", tag: "#ec4899", files: [
+    { name: "Highlights.md", md: `# highlights
+- **1,000+** hours building with ai
+- **5 figures** from a clothing brand i started at 13
+- **732** cold emails sent in one week
+- **2,191** people on linkedin who for some reason read my posts
+- **5** things started: krzna, creddr, trackviso, black box, pythe
+
+-dk` },
+    { name: "Screenshots.md", md: `# screenshots
+
+![Pythe](img/pythe-hero.webp)
+
+### pythe
+the founder dashboard. company write-up, research and roadmap in one place
+
+![Black Box](img/blackbox.jpg)
+
+### black box
+the flight recorder for ai agents
+
+![Creddr](img/creddr.webp)
+
+### creddr
+finance careers from zero
+
+![Trackviso](img/trackviso.webp)
+
+### trackviso
+revision but make it a game` },
+    { name: "Growth Playbook.md", md: `# the founder's growth playbook
+<div class="meta">free · 60 pages · no email</div>
+
+me and abhi wrote down everything we learnt
+
+- 4 stages: validate, launch, grow, scale
+- 18 fill in templates, each with a worked example
+- customer discovery script, cold email sequence, retention checklist, investor update email
+- every stage ends with an exit check and a 14 to 30 day plan
+- the 12 most expensive mistakes
+
+no gate. just take it
+
+-dk` },
+    { name: "before0 x Pythe.md", md: `# before0 x pythe
+<div class="meta">a residency</div>
+
+10 exceptional builders
+
+1 villa
+
+food covered. travel covered
+
+a room full of people who are obsessed with building
+
+-dk` },
+    { name: "Pythe Logo.md", md: `# the pythe logo
+
+![Pythe logo](img/pythe-logo.webp)
+
+a brushed steel P with a play button inside it
+
+plan it. then press play` },
+    { name: "Krzna Wordmark.md", md: `# krzna wordmark
+
+![Krzna logo](img/krzna.webp)
+
+hand drawn at 13. still kinda hard tbf` },
+    { name: "Wins.md", md: `# wins
+- won my school's public speaking award
+- lamda grade 6 in public speaking, with distinction
+- five figures from krzna at 13
+- 13k+ impressions on one post about cold emails
+- got strangers to roast our landing page and actually fixed it
+
+-dk` }
+  ]},
+  academics: { name: "Academics", tag: "#8b5cf6", files: [
+    { name: "Oxford.md", md: `# oxford
+<div class="meta">the goal: economics & management</div>
+
+ive spent years running tiny companies
+
+now i want to properly understand the economics underneath them
+
+why some products win, why most dont, and how you actually run the thing once it works
+
+-dk` },
+    { name: "GCSEs.md", md: `# gcses
+<div class="meta">predicted 9s across the board</div>
+
+- english language and english literature
+- maths
+- french
+- biology, chemistry, physics
+- economics
+- geography
+- latin (yes latin)` },
+    { name: "A-levels.md", md: `# a-levels
+leaning towards maths, further maths, economics and politics
+
+not locked in yet` },
+    { name: "Competitions.md", md: `# competitions
+<div class="meta">on the list</div>
+
+- john locke global essay competition
+- royal economic society young economist of the year
+- fcdo next generation economics` }
+  ]},
+  interests: { name: "Interests", tag: "#10b981", files: [
+    { name: "Sport.md", md: `# sport
+- **cricket**: county level
+- **football**: nine years
+- **rugby**: at school
+- **karate**: three years
+
+turns out competing translates pretty well to startups` },
+    { name: "Public Speaking.md", md: `# public speaking
+- won my school's public speaking award
+- lamda grade 6 in public speaking, with distinction
+
+so yes. i will talk your ear off about pythe` },
+    { name: "Guitar.md", md: `# guitar
+i play
+
+its the only thing on this desktop without a roadmap` }
+  ]},
+  skills: { name: "Skills", tag: "#ef4444", files: [
+    { name: "Design.md", md: `# design
+<div class="meta">graphic designer for companies at 14</div>
+
+i was doing design work for actual companies at 14
+
+- brand and graphic design
+- motion graphics
+- websites. including this one
+
+if it looks good on anything ive built, thats not an accident
+
+-dk` },
+    { name: "Growth.md", md: `# growth
+building the thing is half of it. getting it in front of people is the other half
+
+- outreach. i will message anyone
+- finding the right people and getting them on a call
+- writing content people actually read
+- turning strangers into users
+
+-dk` },
+    { name: "Building with AI.md", md: `# building with ai
+<div class="meta">1,000+ hours</div>
+
+claude, claude code, cursor, codex, chatgpt
+
+everything on this desktop got shipped that way. including the desktop
+
+the trick isnt the tools. its knowing what to build next
+
+-dk` },
+    { name: "Cold Emails.md", md: `# cold emails
+<div class="meta">732 in one week</div>
+
+for pythe. for fundraising. for personal stuff (fly me out to sf)
+
+what i learnt
+
+- be yourself. dont put on a pretentious cover
+- have a clear ask. vague emails waste everyone's time
+- showboat a bit. how impressive you sound matters
+
+yes the first and third point contradict a bit. its about finding the balance
+
+-dk` }
+  ]}
+};
+
+const DESK_FILES = [
+  { name: "README.md", md: () => `# hey, im daiwik 👌
+<div class="meta">${PROFILE.title} · building [pythe](${PROFILE.links.pythe})</div>
+
+welcome to my desktop
+
+yes its actually a desktop. click stuff
+
+## how this works
+- hover a folder. it bursts open. trust
+- hover any .md file to peek, click to open it
+- the dock has pythe and all my socials
+- \`⌘K\` searches everything. theres also a terminal if youre that kind of person
+
+## the numbers
+- 1,000+ hours building with ai
+- 5 figures from a clothing brand i started at 13
+- 732 cold emails in one week
+- 2,191 linkedin followers
+
+## right now
+building [pythe](${PROFILE.links.pythe}) with abhi. your ai cofounder with a team of ai agents to build anything
+
+-dk` },
+  { name: "about-me.md", md: () => `# about me
+
+![${PROFILE.name}](${PROFILE.photo})
+
+im daiwik. im 16. im the ceo of pythe
+
+i started my first company at 13. a clothing brand. it made five figures and i thought i had cracked business forever
+
+i hadnt
+
+but i was hooked
+
+at 14 i was doing graphic design for companies
+
+since then
+
+creddr, trackviso, black box, and now pythe with abhi
+
+1,000+ hours vibecoding
+
+732 cold emails in a single week (still waiting on that flight to sf)
+
+## what im actually like
+i dont really switch off. i just switch what im working on
+
+i made my first sale at 13 and havent stopped since
+
+i take latin and run an ai company. nobody has managed to explain that combo to me either
+
+if youre building something, i want to hear about it. the real version, not the pitch
+
+give me a problem and a deadline and ill be fine
+
+## when im not building
+county cricket. nine years of football. rugby at school. three years of karate
+
+i play guitar
+
+i won my school's public speaking award and got lamda grade 6 with distinction. so yes i will talk your ear off
+
+## the plan
+scale pythe to 10k mrr
+
+work at a yc startup
+
+economics & management at oxford
+
+then do it all again but bigger
+
+-dk` },
+  { name: "now.md", md: () => `# now
+<div class="meta">updated ${new Date().toLocaleDateString(undefined,{month:"long",year:"numeric"}).toLowerCase()}</div>
+
+- scaling pythe to 10k mrr
+- sending way too many cold emails
+- trying to make instagram happen ([@dwk.z](${PROFILE.links.instagram}), help me get past 10 followers)
+- prepping for oxford e&m
+- climbing the next floor. not staring at the whole building
+
+-dk` },
+  { name: "contact.md", md: () => `# contact
+- **email**: \`${PROFILE.links.email}\`
+- **linkedin**: [daiwik-khedekar](${PROFILE.links.linkedin})
+- **x**: [@daiwikbuilds](${PROFILE.links.x})
+- **instagram**: [@dwk.z](${PROFILE.links.instagram})
+- **github**: [dkhedekar79](${PROFILE.links.github})
+- **pythe**: [pythe.app](${PROFILE.links.pythe})
+
+cold emails welcome. i send enough of them
+
+-dk` }
+];
+
+const TRASH = [{ name: "old-landing-page.md", md: `# old landing page
+five prices for three plans
+
+nobody could tell who it was for in 10 seconds
+
+strangers roasted it. they were right` }];
+
+/* ============ Icons ============ */
+const SVG = {
+  folder: (s=64) => `<svg width="${s}" height="${s*0.8}" viewBox="0 0 64 51"><path d="M3 6a4 4 0 0 1 4-4h15.5l5 5H57a4 4 0 0 1 4 4v35a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" fill="url(#gFolderBack)"/><g class="folder-paper"><rect x="8" y="9" width="48" height="22" rx="2" fill="#fff"/><rect x="11" y="13" width="26" height="2" rx="1" fill="#cfd8e3"/><rect x="11" y="18" width="36" height="2" rx="1" fill="#e2e8f0"/></g><path class="folder-front" d="M1.5 17.5a4 4 0 0 1 4-4h53a4 4 0 0 1 4 4V46a4 4 0 0 1-4 4h-53a4 4 0 0 1-4-4z" fill="url(#gFolderFront)"/><path d="M1.5 17.5a4 4 0 0 1 4-4h53a4 4 0 0 1 4 4v.6H1.5z" fill="#fff" fill-opacity=".45"/></svg>`,
+  mdfile: (s=52) => `<svg width="${s*0.8}" height="${s}" viewBox="0 0 42 52"><path d="M3 1h26l12 12v35a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V4a3 3 0 0 1 3-3z" fill="#fff" stroke="#c9ced8" stroke-width="1"/><path d="M29 1v9a3 3 0 0 0 3 3h9" fill="#eef1f6" stroke="#c9ced8" stroke-width="1"/><rect x="6" y="18" width="22" height="2" rx="1" fill="#d5dbe5"/><rect x="6" y="23" width="28" height="2" rx="1" fill="#e3e7ee"/><rect x="6" y="28" width="25" height="2" rx="1" fill="#e3e7ee"/><rect x="7" y="36" width="28" height="11" rx="2.5" fill="#4b5563"/><text x="21" y="44.2" text-anchor="middle" font-family="-apple-system,Helvetica,Arial" font-weight="700" font-size="7.5" fill="#fff">MD</text></svg>`,
+  finder: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="url(#gFinder)"/><path d="M50 0v100" stroke="#1773d1" stroke-width="0"/><path d="M53 8c-6 14-8 30-7 46h9" fill="none" stroke="#11253f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="28" y="30" width="6" height="14" rx="3" fill="#11253f"/><rect x="66" y="30" width="6" height="14" rx="3" fill="#11253f"/><path d="M24 68c16 12 36 12 52 0" fill="none" stroke="#11253f" stroke-width="4" stroke-linecap="round"/></svg>`,
+  terminal: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#2b2f37"/><rect x="5" y="5" width="90" height="90" rx="18" fill="#16181d" stroke="#3b404a" stroke-width="1"/><path d="M24 34l14 12-14 12" fill="none" stroke="#e8ecf2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M44 62h22" stroke="#e8ecf2" stroke-width="5" stroke-linecap="round"/></svg>`,
+  pythe: `<span class="pyico"><img src="img/pythe-logo.webp" alt=""></span>`,
+  pytheOld: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="url(#gPythe)"/><path d="M36 76V28h18a14 14 0 0 1 0 28H36" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M58 76l-8-8" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".0"/><path d="M26 42l10 0" stroke="#fff" stroke-width="0"/><path d="M33 40l9 6-9 6z" fill="#2c6cc4"/></svg>`,
+  linkedin: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#0a66c2"/><rect x="22" y="40" width="12" height="38" rx="2" fill="#fff"/><circle cx="28" cy="27" r="7.5" fill="#fff"/><path d="M44 40h11.5v5.5C58 41 62 39 67.5 39 76 39 80 44 80 54v24H68V57c0-5-1.8-8-6-8-4.5 0-6 3.3-6 8v21H44z" fill="#fff"/></svg>`,
+  instagram: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="url(#gIg)"/><rect x="23" y="23" width="54" height="54" rx="16" fill="none" stroke="#fff" stroke-width="7"/><circle cx="50" cy="50" r="12.5" fill="none" stroke="#fff" stroke-width="7"/><circle cx="66.5" cy="33.5" r="4" fill="#fff"/></svg>`,
+  github: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#1f2328"/><g transform="translate(20 20) scale(3.75)"><path fill="#fff" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></g></svg>`,
+  x: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#0b0b0c"/><g transform="translate(24 24) scale(2.15)"><path fill="#fff" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></g></svg>`,
+  mail: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#3d9bf5"/><rect x="18" y="30" width="64" height="44" rx="6" fill="#fff"/><path d="M20 33l30 22 30-22" fill="none" stroke="#3d9bf5" stroke-width="4" stroke-linejoin="round"/></svg>`,
+  trash: (full) => `<svg viewBox="0 0 100 100"><path d="M22 22h56l-6 70a5 5 0 0 1-5 4.5H33a5 5 0 0 1-5-4.5z" fill="url(#gGlass)" stroke="#9aa3b0" stroke-width="1.2"/>${full?'<path d="M30 30c6-10 14-6 20-2s16-8 20 2l-1 6H31z" fill="#fff" stroke="#c7ced8"/>':''}<ellipse cx="50" cy="22" rx="29" ry="5" fill="#e9edf2" stroke="#9aa3b0" stroke-width="1.2"/>${[34,42,50,58,66].map(x=>`<path d="M${x} 32l${(x-50)*0.08} 58" stroke="#a7afbb" stroke-width="1.3"/>`).join("")}</svg>`,
+  side: {
+    desktop:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5"/><path d="M5.5 14h5M8 11.5V14"/></svg>`,
+    folder:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 4a1.5 1.5 0 0 1 1.5-1.5h3l1.5 1.5H13A1.5 1.5 0 0 1 14.5 5.5v6A1.5 1.5 0 0 1 13 13H3a1.5 1.5 0 0 1-1.5-1.5z"/></svg>`,
+    trash:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 4.5h10M6 4.5V3h4v1.5M4.2 4.5l.7 9h6.2l.7-9"/></svg>`,
+    link:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.5 2.5 0 0 1 3.5 3.5L10.5 8M9 11.5l-1.3 1.3a2.5 2.5 0 0 1-3.5-3.5L5.5 8"/></svg>`
+  }
+};
+
+/* ============ Helpers ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const mdOf = f => typeof f.md === "function" ? f.md() : f.md;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function inline(s){
+  // keep the small amount of trusted HTML (meta divs) by only escaping outside tags we own
+  return esc(s)
+    .replace(/`([^`]+)`/g, (_,c)=>`<code>${c}</code>`)
+    .replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g,"$1<em>$2</em>")
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,(_,t,u)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`);
+}
+function renderMD(src){
+  const lines = src.split("\n"); let out = [], i = 0;
+  while (i < lines.length){
+    let l = lines[i];
+    if (/^```/.test(l)){ let buf=[]; i++; while(i<lines.length && !/^```/.test(lines[i])) buf.push(lines[i++]); i++; out.push(`<pre><code>${esc(buf.join("\n"))}</code></pre>`); continue; }
+    if (/^<div class="meta">.*<\/div>$/.test(l)){ out.push(`<div class="meta">${inline(l.replace(/^<div class="meta">|<\/div>$/g,""))}</div>`); i++; continue; }
+    let im = l.match(/^!\[([^\]]*)\]\(([^)\s]+)\)\s*$/); if (im){ out.push(`<img src="${im[2]}" alt="${esc(im[1])}"${/logo/i.test(im[1])?' class="logo"':""} loading="lazy">`); i++; continue; }
+    let h = l.match(/^(#{1,3})\s+(.*)/); if (h){ out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); i++; continue; }
+    if (/^---\s*$/.test(l)){ out.push("<hr>"); i++; continue; }
+    if (/^\|/.test(l)){ i++; continue; }
+    if (/^>\s?/.test(l)){ let b=[]; while(i<lines.length && /^>\s?/.test(lines[i])) b.push(lines[i++].replace(/^>\s?/,"")); out.push(`<blockquote><p>${inline(b.join(" "))}</p></blockquote>`); continue; }
+    if (/^\s*[-*]\s+/.test(l)){ let b=[]; while(i<lines.length && /^\s*[-*]\s+/.test(lines[i])) b.push(lines[i++].replace(/^\s*[-*]\s+/,"")); out.push("<ul>"+b.map(x=>`<li>${inline(x).replace(/^\[ \]/,"☐").replace(/^\[x\]/i,"☑")}</li>`).join("")+"</ul>"); continue; }
+    if (/^\s*\d+\.\s+/.test(l)){ let b=[]; while(i<lines.length && /^\s*\d+\.\s+/.test(lines[i])) b.push(lines[i++].replace(/^\s*\d+\.\s+/,"")); out.push("<ol>"+b.map(x=>`<li>${inline(x)}</li>`).join("")+"</ol>"); continue; }
+    if (!l.trim()){ i++; continue; }
+    let p=[]; while(i<lines.length && lines[i].trim() && !/^(#|>|```|\s*[-*]\s|\s*\d+\.\s|---|<div)/.test(lines[i])) p.push(lines[i++]);
+    if (!p.length){ p.push(lines[i++]); }
+    out.push(`<p>${inline(p.join(" "))}</p>`);
+  }
+  return out.join("\n");
+}
+function snippet(src){
+  const t = src.replace(/<[^>]+>/g,"").replace(/!\[[^\]]*\]\([^)]*\)/g,"").split("\n").filter(Boolean);
+  const title = (t.find(x=>x.startsWith("#"))||"").replace(/^#+\s*/,"");
+  const body = t.filter(x=>!x.startsWith("#")).slice(0,3).join(" ").replace(/[*`\[\]]/g,"").replace(/\(http[^)]*\)/g,"").slice(0,90);
+  return { title, body };
+}
+
+/* ============ Desktop icons ============ */
+const desktopItems = [
+  ...Object.entries(FOLDERS).map(([key,f]) => ({ kind:"folder", key, name:f.name, tag:f.tag })),
+  ...DESK_FILES.map(f => ({ kind:"file", file:f, name:f.name }))
+];
+const iconsEl = $("#icons");
+const userPos = new Map();
+desktopItems.forEach((it, idx) => {
+  const d = el("div","icon");
+  d.tabIndex = 0; d.dataset.idx = idx; d.setAttribute("role","button"); d.setAttribute("aria-label", it.name);
+  d.innerHTML = `<div class="art">${it.kind==="folder"?SVG.folder(60):SVG.mdfile(56)}</div>${it.tag?`<i class="tagdot" style="background:${it.tag}"></i>`:""}<div class="label">${esc(it.name)}</div>`;
+  it.el = d; iconsEl.appendChild(d);
+});
+function layoutIcons(){
+  const W = innerWidth, H = innerHeight - 28 - 100;
+  const cell = W < 760 ? 92 : 104, colW = W < 760 ? 88 : 102;
+  const rows = Math.max(1, Math.floor((H - 10) / cell));
+  desktopItems.forEach((it, i) => {
+    if (userPos.has(i)){ const p = userPos.get(i); it.el.style.left = p.x+"px"; it.el.style.top = p.y+"px"; return; }
+    const col = Math.floor(i / rows), row = i % rows;
+    it.el.style.left = (W - 16 - colW*(col+1)) + "px";
+    it.el.style.top = (12 + row*cell) + "px";
+  });
+}
+layoutIcons(); addEventListener("resize", () => { layoutIcons(); closeBurst(true); });
+
+function selectIcon(e, add){
+  if (!add) document.querySelectorAll(".icon.sel").forEach(x=>x.classList.remove("sel"));
+  if (e) e.classList.add("sel");
+}
+
+/* drag + click */
+desktopItems.forEach((it, i) => {
+  const e = it.el; let sx, sy, ox, oy, moved = false, down = false;
+  e.addEventListener("pointerdown", ev => {
+    if (ev.button !== 0) return;
+    down = true; moved = false; sx = ev.clientX; sy = ev.clientY; ox = e.offsetLeft; oy = e.offsetTop;
+    selectIcon(e, ev.metaKey || ev.shiftKey); e.setPointerCapture(ev.pointerId); ev.stopPropagation();
+  });
+  e.addEventListener("pointermove", ev => {
+    if (!down) return;
+    const dx = ev.clientX - sx, dy = ev.clientY - sy;
+    if (!moved && Math.hypot(dx,dy) > 5){ moved = true; e.classList.add("dragging"); closeBurst(); hideQL(true); }
+    if (moved){ e.style.left = (ox+dx)+"px"; e.style.top = Math.max(0, oy+dy)+"px"; }
+  });
+  e.addEventListener("pointerup", ev => {
+    if (!down) return; down = false; e.classList.remove("dragging");
+    if (moved){ userPos.set(i, {x:e.offsetLeft, y:e.offsetTop}); return; }
+    openItem(it, e);
+  });
+  e.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); openItem(it, e); } });
+  e.addEventListener("pointerenter", ev => { if (ev.pointerType === "touch" || down) return; it.kind === "folder" ? scheduleBurst(it) : scheduleQL(it); });
+  e.addEventListener("pointerleave", () => { it.kind === "folder" ? scheduleCloseBurst() : scheduleHideQL(); clearTimeout(qlOpenT); clearTimeout(burstOpenT); });
+  e.addEventListener("focus", () => { if (it.kind === "folder") scheduleBurst(it); });
+  e.addEventListener("blur", () => { if (it.kind === "folder") scheduleCloseBurst(); });
+});
+function openItem(it, origin){
+  closeBurst(); hideQL(true);
+  if (it.kind === "folder") openFinder(it.key, origin);
+  else openDoc(it.file, origin);
+}
+
+/* ============ Burst ============ */
+const burstEl = $("#burst");
+let burstFor = null, burstCloseT, burstOpenT;
+function scheduleBurst(it){ clearTimeout(burstCloseT); clearTimeout(burstOpenT); if (burstFor === it) return; burstOpenT = setTimeout(()=>openBurst(it), 90); }
+function scheduleCloseBurst(){ clearTimeout(burstCloseT); burstCloseT = setTimeout(()=>closeBurst(), 320); }
+burstEl.addEventListener("pointerover", () => clearTimeout(burstCloseT));
+burstEl.addEventListener("pointerout", ev => { if (!burstEl.contains(ev.relatedTarget)) scheduleCloseBurst(); });
+
+function openBurst(it){
+  closeBurst(true); hideQL(true);
+  burstFor = it; it.el.classList.add("burst");
+  const files = FOLDERS[it.key].files;
+  const r = it.el.querySelector(".art").getBoundingClientRect();
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  const n = files.length;
+  // fan toward the screen's centre
+  const base = Math.atan2(innerHeight*0.45 - cy, innerWidth*0.5 - cx);
+  const spread = Math.min(Math.PI*0.9, 0.5 * (n-1) + 0.001);
+  const radius = 190 + n*22;
+  const cardW = 104, cardH = 128;
+  files.forEach((f, i) => {
+    const t = n === 1 ? 0 : (i/(n-1) - .5);
+    const a = base + t*spread;
+    let x = cx + Math.cos(a)*radius - cardW/2, y = cy + Math.sin(a)*radius - cardH/2;
+    x = Math.min(Math.max(8, x), innerWidth - cardW - 8);
+    y = Math.min(Math.max(36, y), innerHeight - cardH - 96);
+    const s = snippet(f.md);
+    const c = el("button","bcard");
+    c.style.left = x+"px"; c.style.top = y+"px";
+    c.style.setProperty("--dx", (cx - (x+cardW/2))+"px");
+    c.style.setProperty("--dy", (cy - (y+cardH/2))+"px");
+    c.style.setProperty("--r", (t*14).toFixed(1)+"deg");
+    c.style.setProperty("--d", (i*45)+"ms");
+    c.style.setProperty("--d2", ((n-1-i)*25)+"ms");
+    c.innerHTML = `<div class="page" data-ext="MD"><b>${esc(s.title)}</b>${esc(s.body)}<i style="width:90%"></i><i style="width:70%"></i><i style="width:82%"></i></div><div class="nm">${esc(f.name)}</div>`;
+    c.addEventListener("click", () => { const origin = c; openDoc(f, origin); closeBurst(); });
+    burstEl.appendChild(c);
+  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>burstEl.querySelectorAll(".bcard").forEach(c=>c.classList.add("out"))));
+}
+function closeBurst(instant){
+  clearTimeout(burstCloseT);
+  if (burstFor) burstFor.el.classList.remove("burst");
+  burstFor = null;
+  const cards = [...burstEl.children];
+  if (instant){ cards.forEach(c=>c.remove()); return; }
+  cards.forEach(c => { c.classList.add("back"); c.classList.remove("out"); c.style.pointerEvents="none"; setTimeout(()=>c.remove(), 450); });
+}
+
+/* ============ Quick Look ============ */
+let ql = null, qlT, qlOpenT, qlFor = null;
+function scheduleQL(it){ clearTimeout(qlT); clearTimeout(qlOpenT); if (qlFor === it) return; qlOpenT = setTimeout(()=>showQL(it), 260); }
+function scheduleHideQL(){ clearTimeout(qlT); qlT = setTimeout(()=>hideQL(), 260); }
+function showQL(it){
+  hideQL(true); closeBurst(true);
+  qlFor = it;
+  const r = it.el.querySelector(".art").getBoundingClientRect();
+  ql = el("div"); ql.id = "ql";
+  const W = Math.min(360, innerWidth - 32), H = 440;
+  let x = r.left - W - 18; if (x < 16) x = Math.min(r.right + 18, innerWidth - W - 16);
+  let y = Math.min(Math.max(36, r.top - 60), innerHeight - H - 100);
+  ql.style.left = x+"px"; ql.style.top = y+"px";
+  ql.style.setProperty("--ox", (r.left + r.width/2 - x)+"px"); ql.style.setProperty("--oy", (r.top + r.height/2 - y)+"px");
+  ql.innerHTML = `<div class="qlbar">${esc(it.name)}<span>Click to open</span></div><div class="qlbody"><div class="md">${renderMD(mdOf(it.file))}</div></div>`;
+  ql.addEventListener("pointerenter", ()=>clearTimeout(qlT));
+  ql.addEventListener("pointerleave", scheduleHideQL);
+  ql.addEventListener("click", ev => { if (ev.target.closest("a")) return; openItem(it, it.el); });
+  document.body.appendChild(ql);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ql && ql.classList.add("on")));
+}
+function hideQL(instant){
+  clearTimeout(qlT); qlFor = null;
+  if (!ql) return; const q = ql; ql = null;
+  if (instant) return q.remove();
+  q.classList.remove("on"); setTimeout(()=>q.remove(), 300);
+}
+
+/* ============ Marquee selection ============ */
+const mq = $("#marquee");
+$("#desktop").addEventListener("pointerdown", ev => {
+  if (ev.button !== 0 || ev.target.closest(".icon,.wg")) return;
+  closeMenus(); selectIcon(null);
+  const sx = ev.clientX, sy = ev.clientY;
+  const move = e => {
+    const x = Math.min(sx,e.clientX), y = Math.min(sy,e.clientY), w = Math.abs(e.clientX-sx), h = Math.abs(e.clientY-sy);
+    Object.assign(mq.style,{display:"block",left:x+"px",top:y+"px",width:w+"px",height:h+"px"});
+    desktopItems.forEach(it => { const r = it.el.getBoundingClientRect(); it.el.classList.toggle("sel", r.right>x && r.left<x+w && r.bottom>y && r.top<y+h); });
+  };
+  const up = () => { mq.style.display="none"; removeEventListener("pointermove",move); removeEventListener("pointerup",up); };
+  addEventListener("pointermove",move); addEventListener("pointerup",up);
+});
+
+/* ============ Windows ============ */
+const winLayer = $("#windows");
+let zTop = 10, wins = [], cascade = 0;
+function focusWin(w){
+  wins.forEach(x => x.el.classList.toggle("blur", x !== w));
+  if (w){ w.el.style.zIndex = ++zTop; $("#appName").textContent = w.app; }
+  else $("#appName").textContent = "Finder";
+  updateDockRunning();
+}
+function rectOf(origin){
+  if (!origin) return null;
+  const r = origin.getBoundingClientRect(); return r.width ? r : null;
+}
+function createWin({ id, title, app, w=720, h=480, cls="", origin }){
+  const existing = wins.find(x => x.id === id);
+  if (existing){ if (existing.min) restoreWin(existing); focusWin(existing); return existing; }
+  const mob = innerWidth < 760;
+  w = Math.min(w, innerWidth - (mob?16:40)); h = Math.min(h, innerHeight - 28 - 110);
+  const wgR = $("#widgets").getBoundingClientRect().right + 28;
+  const x = mob ? 8 : Math.max(20, Math.min(Math.max(wgR, (innerWidth - w)/2 - 140), innerWidth - w - 130) + (cascade%6)*28);
+  const y = mob ? 36 : Math.max(40, (innerHeight - h)/2 - 60 + (cascade%6)*24);
+  cascade++;
+  const e = el("div","win "+cls);
+  Object.assign(e.style,{left:x+"px",top:y+"px",width:w+"px",height:h+"px"});
+  e.innerHTML = `<div class="tbar"><div class="lights"><button class="c" aria-label="Close"><svg viewBox="0 0 8 8"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5"/></svg></button><button class="m" aria-label="Minimize"><svg viewBox="0 0 8 8"><path d="M1 4h6"/></svg></button><button class="x" aria-label="Zoom"><svg viewBox="0 0 8 8"><path d="M1.5 3.2V1.5h1.7M6.5 4.8v1.7H4.8" /></svg></button></div><div class="extra"></div><div class="ttl">${esc(title)}</div></div><div class="wbody"></div><div class="rsz"></div>`;
+  winLayer.appendChild(e);
+  const W = { id, title, app, el:e, body:$(".wbody",e), min:false, origin };
+  wins.push(W); focusWin(W);
+  e.addEventListener("pointerdown", () => focusWin(W));
+  $(".c",e).onclick = ev => { ev.stopPropagation(); closeWin(W); };
+  $(".m",e).onclick = ev => { ev.stopPropagation(); minimizeWin(W); };
+  $(".x",e).onclick = ev => { ev.stopPropagation(); toggleMax(W); };
+  $(".tbar",e).addEventListener("dblclick", ev => { if (!ev.target.closest("button")) toggleMax(W); });
+  dragify(W); resizify(W);
+  const r = rectOf(origin);
+  if (r && !reduce){
+    const fx = r.left + r.width/2 - (x + w/2), fy = r.top + r.height/2 - (y + h/2);
+    e.animate([{transform:`translate(${fx}px,${fy}px) scale(${Math.max(.06,r.width/w)})`,opacity:.2},{transform:"none",opacity:1}],{duration:420,easing:"cubic-bezier(.2,.9,.25,1.05)"});
+  } else e.animate([{transform:"scale(.94)",opacity:0},{transform:"none",opacity:1}],{duration:220,easing:"ease-out"});
+  return W;
+}
+function dragify(W){
+  const bar = $(".tbar",W.el);
+  bar.addEventListener("pointerdown", ev => {
+    if (ev.target.closest("button,input")) return;
+    if (W.el.classList.contains("max")) return;
+    const sx = ev.clientX, sy = ev.clientY, ox = W.el.offsetLeft, oy = W.el.offsetTop;
+    bar.setPointerCapture(ev.pointerId);
+    const mv = e => { W.el.style.left = (ox + e.clientX - sx)+"px"; W.el.style.top = Math.max(28, oy + e.clientY - sy)+"px"; };
+    const up = () => { bar.removeEventListener("pointermove",mv); bar.removeEventListener("pointerup",up); };
+    bar.addEventListener("pointermove",mv); bar.addEventListener("pointerup",up);
+  });
+}
+function resizify(W){
+  const h = $(".rsz",W.el);
+  h.addEventListener("pointerdown", ev => {
+    ev.stopPropagation(); h.setPointerCapture(ev.pointerId);
+    const sx = ev.clientX, sy = ev.clientY, ow = W.el.offsetWidth, oh = W.el.offsetHeight;
+    const mv = e => { W.el.style.width = Math.max(320, ow + e.clientX - sx)+"px"; W.el.style.height = Math.max(200, oh + e.clientY - sy)+"px"; };
+    const up = () => { h.removeEventListener("pointermove",mv); h.removeEventListener("pointerup",up); };
+    h.addEventListener("pointermove",mv); h.addEventListener("pointerup",up);
+  });
+}
+function toggleMax(W){
+  const e = W.el, from = e.getBoundingClientRect();
+  if (e.classList.contains("max")){ e.classList.remove("max"); Object.assign(e.style, W.saved); }
+  else { W.saved = {left:e.style.left,top:e.style.top,width:e.style.width,height:e.style.height}; e.classList.add("max"); Object.assign(e.style,{left:"0px",top:"28px",width:innerWidth+"px",height:(innerHeight-28)+"px"}); }
+  const to = e.getBoundingClientRect();
+  e.animate([{transform:`translate(${from.left-to.left}px,${from.top-to.top}px) scale(${from.width/to.width},${from.height/to.height})`,transformOrigin:"0 0"},{transform:"none",transformOrigin:"0 0"}],{duration:320,easing:"cubic-bezier(.2,.9,.3,1)"});
+}
+function closeWin(W){
+  const e = W.el; wins = wins.filter(x=>x!==W);
+  const r = rectOf(W.origin);
+  const b = e.getBoundingClientRect();
+  const kf = r && !reduce ? [{transform:"none",opacity:1},{transform:`translate(${r.left+r.width/2-(b.left+b.width/2)}px,${r.top+r.height/2-(b.top+b.height/2)}px) scale(.08)`,opacity:0}] : [{opacity:1,transform:"none"},{opacity:0,transform:"scale(.94)"}];
+  e.animate(kf,{duration:r?320:180,easing:"cubic-bezier(.5,0,.75,0)"}).onfinish = () => e.remove();
+  focusWin(wins.filter(x=>!x.min).sort((a,b)=>b.el.style.zIndex-a.el.style.zIndex)[0] || null);
+  if (W.mini) W.mini.remove();
+  renderMinis();
+}
+function minimizeWin(W){
+  if (W.min) return; W.min = true;
+  renderMinis();
+  const slot = W.mini; const e = W.el;
+  const b = e.getBoundingClientRect(), t = slot.getBoundingClientRect();
+  const dx = t.left + t.width/2 - (b.left + b.width/2), dy = t.top + t.height/2 - (b.top + b.height/2);
+  const s = t.width / b.width;
+  const a = e.animate([
+    {transform:"none",opacity:1},
+    {transform:`translate(${dx*0.35}px,${dy*0.55}px) scale(${0.75},${0.6}) skewX(${dx>0?-8:8}deg)`,opacity:1,offset:.45},
+    {transform:`translate(${dx}px,${dy}px) scale(${s})`,opacity:.3}
+  ],{duration:reduce?1:520,easing:"cubic-bezier(.55,0,.3,1)"});
+  a.onfinish = () => { e.style.display = "none"; };
+  focusWin(wins.filter(x=>!x.min).sort((a,b)=>b.el.style.zIndex-a.el.style.zIndex)[0] || null);
+}
+function restoreWin(W){
+  const e = W.el; e.style.display = "";
+  const t = W.mini.getBoundingClientRect(), b = e.getBoundingClientRect();
+  e.animate([{transform:`translate(${t.left+t.width/2-(b.left+b.width/2)}px,${t.top+t.height/2-(b.top+b.height/2)}px) scale(${t.width/b.width})`,opacity:.3},{transform:"none",opacity:1}],{duration:reduce?1:420,easing:"cubic-bezier(.2,.9,.3,1)"});
+  W.min = false; renderMinis(); focusWin(W);
+}
+
+/* Finder */
+const NAV = [
+  { key:"desktop", label:"Desktop", icon:SVG.side.desktop },
+  ...Object.entries(FOLDERS).map(([k,f]) => ({ key:k, label:f.name, icon:SVG.side.folder })),
+  { key:"trash", label:"Trash", icon:SVG.side.trash }
+];
+function folderContents(key){
+  if (key === "desktop") return desktopItems.map(it => it.kind==="folder" ? {kind:"folder",key:it.key,name:it.name} : {kind:"file",file:it.file,name:it.name});
+  if (key === "trash") return TRASH.map(f=>({kind:"file",file:f,name:f.name}));
+  return FOLDERS[key].files.map(f=>({kind:"file",file:f,name:f.name}));
+}
+const labelOf = k => k==="desktop"?"Desktop":k==="trash"?"Trash":FOLDERS[k].name;
+function openFinder(key="desktop", origin){
+  const existing = wins.find(w => w.app==="Finder" && !w.min);
+  const W = existing && !origin ? existing : createWin({ id:"finder-"+Date.now(), title:labelOf(key), app:"Finder", w:780, h:500, origin });
+  W.hist = W.hist || []; W.fwd = [];
+  if (!W.built){
+    W.built = true;
+    $(".extra",W.el).innerHTML = `<div class="fnav"><button class="bk" aria-label="Back"><svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg></button><button class="fw" aria-label="Forward"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button></div>`;
+    W.body.innerHTML = `<aside class="fside"></aside><section class="fmain"><div class="fgrid"></div><div class="fpath"></div></section>`;
+    const side = $(".fside",W.body);
+    side.innerHTML = `<h5>Favorites</h5>` + NAV.map(n=>`<button data-k="${n.key}">${n.icon}<span>${n.label}</span></button>`).join("") +
+      `<h5>Links</h5>` + [["Pythe","pythe"],["GitHub","github"],["LinkedIn","linkedin"]].map(([l,k])=>`<a href="${PROFILE.links[k]}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:6px;text-decoration:none">${SVG.side.link}<span>${l}</span></a>`).join("") +
+      `<h5>Tags</h5>` + Object.entries(FOLDERS).map(([k,f])=>`<button data-k="${k}"><i class="tg" style="background:${f.tag}"></i><span>${f.name}</span></button>`).join("");
+    side.querySelectorAll("svg").forEach(s=>s.style.color="var(--accent)");
+    side.addEventListener("click", ev => { const b = ev.target.closest("button[data-k]"); if (b) navTo(W, b.dataset.k); });
+    $(".bk",W.el).onclick = () => { if (!W.hist.length) return; W.fwd.push(W.cur); navTo(W, W.hist.pop(), true); };
+    $(".fw",W.el).onclick = () => { if (!W.fwd.length) return; W.hist.push(W.cur); navTo(W, W.fwd.pop(), true); };
+  }
+  navTo(W, key, !W.cur);
+  focusWin(W);
+}
+function navTo(W, key, noHist){
+  if (W.cur && !noHist && W.cur !== key){ W.hist.push(W.cur); W.fwd = []; }
+  W.cur = key; W.title = labelOf(key);
+  $(".ttl",W.el).textContent = W.title;
+  W.el.querySelectorAll(".fside button").forEach(b=>b.classList.toggle("on", b.dataset.k===key && !b.querySelector(".tg")));
+  $(".bk",W.el).disabled = !W.hist.length; $(".fw",W.el).disabled = !W.fwd.length;
+  const grid = $(".fgrid",W.body); grid.innerHTML = "";
+  const items = folderContents(key);
+  items.forEach((it,i) => {
+    const b = el("button","fitem", `<div class="art">${it.kind==="folder"?SVG.folder(58):SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
+    b.onclick = () => { grid.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
+    b.ondblclick = () => it.kind==="folder" ? navTo(W, it.key) : openDoc(it.file, b);
+    b.onkeydown = e => { if (e.key==="Enter") b.ondblclick(); };
+    if (!reduce) b.animate([{opacity:0,transform:"translateY(6px) scale(.96)"},{opacity:1,transform:"none"}],{duration:260,delay:i*22,fill:"backwards",easing:"ease-out"});
+    grid.appendChild(b);
+  });
+  $(".fpath",W.body).textContent = `Macintosh HD › Users › ${PROFILE.short.toLowerCase()} › ${W.title}  ·  ${items.length} item${items.length===1?"":"s"}  ·  Double-click to open`;
+  renderMinis();
+}
+
+/* Markdown documents */
+function openDoc(file, origin){
+  const W = createWin({ id:"doc-"+file.name, title:file.name, app:"Preview", w:700, h:560, origin });
+  if (W.built) return;
+  W.built = true;
+  const src = mdOf(file);
+  $(".extra",W.el).innerHTML = `<div class="mdtools"><button class="on" data-v="r">Rendered</button><button data-v="s">Source</button></div>`;
+  W.body.innerHTML = `<div class="mdwrap"><article class="md">${renderMD(src)}</article><pre class="src">${esc(src)}</pre></div>`;
+  $(".mdtools",W.el).addEventListener("click", ev => {
+    const b = ev.target.closest("button"); if (!b) return;
+    W.el.querySelectorAll(".mdtools button").forEach(x=>x.classList.toggle("on", x===b));
+    $(".mdwrap",W.body).classList.toggle("raw", b.dataset.v==="s");
+  });
+}
+
+/* About */
+function openAbout(origin){
+  const W = createWin({ id:"about", title:"", app:"Finder", w:340, h:420, origin });
+  if (W.built) return; W.built = true;
+  W.body.innerHTML = `<div class="about"><div class="av" role="img" aria-label="${esc(PROFILE.name)}" style="background-image:url(${PROFILE.photo})"></div><h2>${esc(PROFILE.name)}</h2><p>${esc(PROFILE.title)}</p>
+  <dl><dt>Chip</dt><dd>1,000+ hrs of vibecoding</dd><dt>Memory</dt><dd>732 cold emails / week</dd><dt>Startup Disk</dt><dd>pythe</dd><dt>First boot</dt><dd>krzna ldn, age 13</dd><dt>Next update</dt><dd>10k mrr</dd></dl></div>`;
+}
+
+/* Terminal */
+function openTerminal(origin){
+  const W = createWin({ id:"terminal", title:`${PROFILE.short.toLowerCase()} — zsh — 80×24`, app:"Terminal", w:640, h:400, cls:"terminal", origin });
+  if (W.built){ $("input",W.body)?.focus(); return; } W.built = true;
+  W.body.innerHTML = `<div class="term"><div class="out"></div><div class="inrow"><span class="pr"></span><input id="termIn" aria-label="Terminal input" autocomplete="off" spellcheck="false"></div></div>`;
+  const out = $(".out",W.body), inp = $("input",W.body), pr = $(".pr",W.body), term = $(".term",W.body);
+  let cwd = "~", hist = [], hi = 0;
+  const user = PROFILE.short.toLowerCase();
+  const prompt = () => `${user}@desktop ${cwd} %`;
+  pr.textContent = prompt();
+  const print = (html, cls="") => { const d = el("div","ln "+cls, html); out.appendChild(d); term.scrollTop = term.scrollHeight; };
+  print(`<span class="dim">Last login: ${new Date().toDateString()} on ttys000</span>`);
+  print(`Type <span class="dir">help</span> to see what you can do.`);
+  const dirKey = name => Object.entries(FOLDERS).find(([k,f]) => k===name.toLowerCase() || f.name.toLowerCase()===name.toLowerCase().replace(/\/$/,""))?.[0];
+  const filesHere = () => cwd==="~" ? DESK_FILES : FOLDERS[dirKey(cwd.slice(2))].files;
+  const cmds = {
+    help: () => print(`<span class="dir">ls</span> [folder]     list files
+<span class="dir">cd</span> &lt;folder&gt;     change folder (cd .. to go back)
+<span class="dir">cat</span> &lt;file&gt;      print a file
+<span class="dir">open</span> &lt;name&gt;     open a file, folder or link (pythe, github, linkedin, instagram, x)
+<span class="dir">whoami</span>, <span class="dir">neofetch</span>, <span class="dir">date</span>, <span class="dir">clear</span>, <span class="dir">exit</span>`),
+    ls: a => {
+      if (a){ const k = dirKey(a); return k ? print(FOLDERS[k].files.map(f=>esc(f.name.includes(" ")?`'${f.name}'`:f.name)).join("   ")) : print(`ls: ${esc(a)}: No such file or directory`,"err"); }
+      if (cwd === "~") print(Object.values(FOLDERS).map(f=>`<span class="dir">${esc(f.name.includes(" ")?`'${f.name}'`:f.name)}/</span>`).join("   ") + "   " + DESK_FILES.map(f=>f.name).join("   "));
+      else print(filesHere().map(f=>esc(f.name.includes(" ")?`'${f.name}'`:f.name)).join("   "));
+    },
+    cd: a => { if (!a || a==="~" || a===".."){ cwd="~"; } else { const k = dirKey(a); if (!k) return print(`cd: no such file or directory: ${esc(a)}`,"err"); cwd = "~/"+FOLDERS[k].name; } pr.textContent = prompt(); },
+    cat: a => { const f = filesHere().find(f=>f.name.toLowerCase()===a?.toLowerCase()); f ? print(esc(mdOf(f).replace(/<[^>]+>/g,""))) : print(`cat: ${esc(a||"")}: No such file or directory`,"err"); },
+    open: a => {
+      if (!a) return print("usage: open <name>","err");
+      const l = a.toLowerCase();
+      if (PROFILE.links[l] && l!=="email"){ print(`Opening ${PROFILE.links[l]}`,"dim"); const link = el("a"); link.href=PROFILE.links[l]; link.target="_blank"; link.rel="noopener"; link.click(); return; }
+      const k = dirKey(a); if (k) return openFinder(k);
+      const f = [...DESK_FILES, ...Object.values(FOLDERS).flatMap(x=>x.files)].find(f=>f.name.toLowerCase()===l || f.name.toLowerCase()===l+".md");
+      f ? openDoc(f) : print(`The file ${esc(a)} does not exist.`,"err");
+    },
+    whoami: () => print(`${esc(PROFILE.name)} · ${esc(PROFILE.title)}`),
+    date: () => print(new Date().toString()),
+    echo: a => print(esc(a||"")),
+    clear: () => { out.innerHTML = ""; },
+    exit: () => closeWin(W),
+    sudo: () => print("Nice try.","err"),
+    neofetch: () => print(`<span class="pr">       .---.       </span>  <span class="dir">${esc(user)}@desktop</span>
+<span class="pr">      / o o \\      </span>  ----------------
+<span class="pr">     |   ^   |     </span>  <span class="dir">Role</span>: ${esc(PROFILE.title)}
+<span class="pr">      \\ '-' /      </span>  <span class="dir">Building</span>: Pythe, Creddr, Trackviso, ProjectEnlight
+<span class="pr">       '---'       </span>  <span class="dir">Folders</span>: ${Object.keys(FOLDERS).length}   <span class="dir">Notes</span>: ${DESK_FILES.length + Object.values(FOLDERS).reduce((n,f)=>n+f.files.length,0)}
+                     <span class="dir">Shell</span>: zsh (pretend)`)
+  };
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Enter"){
+      const line = inp.value; inp.value = ""; print(`<span class="pr">${esc(prompt())}</span> ${esc(line)}`);
+      if (!line.trim()) return; hist.push(line); hi = hist.length;
+      const m = line.trim().match(/^(\S+)\s*(.*)$/); const c = m[1], a = m[2].replace(/^['"]|['"]$/g,"");
+      cmds[c] ? cmds[c](a) : print(`zsh: command not found: ${esc(c)}`,"err");
+    } else if (e.key === "ArrowUp"){ if (hi>0){ inp.value = hist[--hi]; } e.preventDefault(); }
+      else if (e.key === "ArrowDown"){ if (hi<hist.length){ inp.value = hist[++hi]||""; } e.preventDefault(); }
+  });
+  term.addEventListener("click", () => { if (!getSelection().toString()) inp.focus(); });
+  setTimeout(()=>inp.focus(), 50);
+}
+
+/* ============ Dock ============ */
+const DOCK = [
+  { id:"finder", label:"Finder", icon:SVG.finder, run:o=>openFinder("desktop",o) },
+  { id:"terminal", label:"Terminal", icon:SVG.terminal, run:o=>openTerminal(o) },
+  { sep:true },
+  { id:"pythe", label:"Pythe", icon:SVG.pythe, href:()=>PROFILE.links.pythe },
+  { id:"linkedin", label:"LinkedIn", icon:SVG.linkedin, href:()=>PROFILE.links.linkedin },
+  { id:"instagram", label:"Instagram", icon:SVG.instagram, href:()=>PROFILE.links.instagram },
+  { id:"github", label:"GitHub", icon:SVG.github, href:()=>PROFILE.links.github },
+  { id:"x", label:"X", icon:SVG.x, href:()=>PROFILE.links.x },
+  { id:"mail", label:"Contact", icon:SVG.mail, run:()=>openDoc(DESK_FILES.find(f=>f.name==="contact.md")) },
+  { sep:true, id:"minisep" },
+  { id:"trash", label:"Trash", icon:SVG.trash(true), run:o=>openFinder("trash",o) }
+];
+const dock = $("#dock"), dockEls = {};
+DOCK.forEach(d => {
+  if (d.sep){ const s = el("div","dsep"); if (d.id) s.id = d.id; dock.appendChild(s); return; }
+  const a = el(d.href ? "a" : "button","dk", `<span class="ico">${d.icon}</span><span class="tip">${d.label}</span><span class="dot"></span>`);
+  a.setAttribute("aria-label", d.label);
+  if (d.href){ a.href = d.href(); a.target = "_blank"; a.rel = "noopener"; }
+  a.addEventListener("click", () => {
+    if (!reduce){ a.classList.remove("bounce"); void a.offsetWidth; a.classList.add("bounce"); setTimeout(()=>a.classList.remove("bounce"), 1900); }
+    if (d.run) d.run(a.querySelector(".ico"));
+  });
+  dockEls[d.id] = a; dock.appendChild(a);
+});
+const miniSep = $("#minisep");
+function renderMinis(){
+  dock.querySelectorAll(".dk.mini").forEach(m=>m.remove());
+  const mins = wins.filter(w=>w.min);
+  miniSep.hidden = !mins.length;
+  mins.forEach(W => {
+    const m = el("button","dk mini", `<span class="ico"><div class="mt">${esc(W.title)}</div></span><span class="tip">${esc(W.title)}</span>`);
+    m.onclick = () => restoreWin(W);
+    W.mini = m; dock.insertBefore(m, dockEls.trash);
+  });
+  setDockBase();
+}
+function updateDockRunning(){
+  dockEls.finder.classList.toggle("running", wins.some(w=>w.app==="Finder"));
+  dockEls.terminal.classList.toggle("running", wins.some(w=>w.app==="Terminal"));
+}
+let BASE = 52;
+function setDockBase(){
+  const items = [...dock.querySelectorAll(".dk")];
+  BASE = Math.max(34, Math.min(52, (innerWidth - 60) / (items.length + 1) - 4));
+  items.forEach(i => i.style.setProperty("--s", BASE+"px"));
+}
+setDockBase(); addEventListener("resize", setDockBase);
+const MAX = 1.85, RANGE = 160;
+dock.addEventListener("pointermove", ev => {
+  if (ev.pointerType === "touch") return;
+  dock.classList.add("live");
+  dock.querySelectorAll(".dk").forEach(i => {
+    const r = i.getBoundingClientRect(); const c = r.left + r.width/2;
+    const d = Math.abs(ev.clientX - c);
+    const k = d > RANGE ? 0 : Math.cos((d/RANGE) * Math.PI/2);
+    i.style.setProperty("--s", (BASE * (1 + (MAX-1)*k*k)) + "px");
+  });
+});
+dock.addEventListener("pointerleave", () => { dock.classList.remove("live"); dock.querySelectorAll(".dk").forEach(i=>i.style.setProperty("--s", BASE+"px")); });
+renderMinis();
+
+/* ============ Menus ============ */
+const MENUS = {
+  apple: () => [["About This Site", ()=>openAbout()],0,["Open Terminal", ()=>openTerminal()],["Spotlight Search", ()=>openSpot(), "⌘K"],0,["Contact Me…", ()=>openDoc(DESK_FILES[3])]],
+  app: () => [["About "+($("#appName").textContent), ()=>openAbout()],0,["Hide Windows", ()=>wins.filter(w=>!w.min).forEach(minimizeWin), "⌘H"],["Close All Windows", ()=>[...wins].forEach(closeWin), "⌥⌘W"]],
+  file: () => [["New Finder Window", ()=>openFinder("desktop", null), "⌘N"],["Open README", ()=>openDoc(DESK_FILES[0]), "⌘O"],0,["Close Window", ()=>{ const w = topWin(); w && closeWin(w); }, "⌘W"]],
+  view: () => [["Clean Up Desktop", cleanUp],["Show Widgets", ()=>{ const w=$("#widgets"); w.hidden=!w.hidden; }]],
+  go: () => [["Desktop", ()=>openFinder("desktop"), "⇧⌘D"],0, ...Object.entries(FOLDERS).map(([k,f])=>[f.name, ()=>openFinder(k)]),0,["Trash", ()=>openFinder("trash")]],
+  window: () => [["Minimize", ()=>{ const w = topWin(); w && minimizeWin(w); }, "⌘M"],["Zoom", ()=>{ const w = topWin(); w && toggleMax(w); }],0, ...(wins.length ? wins.map(w=>[w.title||"About", ()=> w.min ? restoreWin(w) : focusWin(w)]) : [["No Windows", null]])],
+  help: () => [["How this site works", ()=>openDoc(DESK_FILES[0])],["Terminal commands", ()=>{ openTerminal(); }]]
+};
+const topWin = () => wins.filter(w=>!w.min).sort((a,b)=>b.el.style.zIndex-a.el.style.zIndex)[0];
+let openMenu = null;
+function closeMenus(){ document.querySelectorAll(".menu").forEach(m=>m.remove()); document.querySelectorAll(".mb-item.open").forEach(m=>m.classList.remove("open")); openMenu = null; }
+function showMenu(btn, items, x, y){
+  closeMenus();
+  const m = el("div","menu"); m.setAttribute("role","menu");
+  items.forEach(it => {
+    if (!it){ m.appendChild(el("hr")); return; }
+    const b = el("button", it[1] ? "" : "dis", `<span>${esc(it[0])}</span>${it[2]?`<kbd>${it[2]}</kbd>`:""}`);
+    b.setAttribute("role","menuitem");
+    b.onclick = () => { closeMenus(); it[1] && it[1](); };
+    m.appendChild(b);
+  });
+  document.body.appendChild(m);
+  if (btn){ const r = btn.getBoundingClientRect(); m.style.left = Math.min(r.left, innerWidth - m.offsetWidth - 8)+"px"; btn.classList.add("open"); openMenu = btn; }
+  else { m.style.top = Math.min(y, innerHeight - m.offsetHeight - 8)+"px"; m.style.left = Math.min(x, innerWidth - m.offsetWidth - 8)+"px"; }
+}
+document.querySelectorAll("[data-menu]").forEach(b => {
+  b.addEventListener("click", ev => { ev.stopPropagation(); openMenu === b ? closeMenus() : showMenu(b, MENUS[b.dataset.menu]()); });
+  b.addEventListener("pointerenter", () => { if (openMenu && openMenu !== b) showMenu(b, MENUS[b.dataset.menu]()); });
+});
+addEventListener("pointerdown", ev => { if (!ev.target.closest(".menu,[data-menu]")) closeMenus(); });
+$("#desktop").addEventListener("contextmenu", ev => {
+  ev.preventDefault();
+  const ic = ev.target.closest(".icon");
+  if (ic){ const it = desktopItems[ic.dataset.idx]; selectIcon(ic); showMenu(null, [["Open", ()=>openItem(it, ic)],["Quick Look", ()=> it.kind==="file" ? showQL(it) : openBurst(it)],0,["Get Info", ()=>openAbout()]], ev.clientX, ev.clientY); return; }
+  showMenu(null, [["New Finder Window", ()=>openFinder("desktop")],["Open Terminal Here", ()=>openTerminal()],0,["Clean Up", cleanUp],["Show View Options", null],0,["About This Site", ()=>openAbout()]], ev.clientX, ev.clientY);
+});
+function cleanUp(){
+  const before = desktopItems.map(it => it.el.getBoundingClientRect());
+  userPos.clear(); layoutIcons();
+  desktopItems.forEach((it,i) => { const a = it.el.getBoundingClientRect(); it.el.animate([{transform:`translate(${before[i].left-a.left}px,${before[i].top-a.top}px)`},{transform:"none"}],{duration:450,easing:"cubic-bezier(.3,1.2,.5,1)"}); });
+}
+
+/* ============ Spotlight ============ */
+const spotIndex = () => [
+  ...Object.entries(FOLDERS).map(([k,f]) => ({ name:f.name, kind:"Folder", icon:SVG.folder(24), go:()=>openFinder(k) })),
+  ...DESK_FILES.map(f => ({ name:f.name, kind:"Desktop", icon:SVG.mdfile(24), go:()=>openDoc(f) })),
+  ...Object.values(FOLDERS).flatMap(F => F.files.map(f => ({ name:f.name, kind:F.name, icon:SVG.mdfile(24), go:()=>openDoc(f), text:mdOf(f) }))),
+  ...DOCK.filter(d=>d.href).map(d => ({ name:d.label, kind:"Link", icon:d.icon, go:()=>{ const a = el("a"); a.href=d.href(); a.target="_blank"; a.rel="noopener"; a.click(); } })),
+  { name:"Terminal", kind:"App", icon:SVG.terminal, go:()=>openTerminal() },
+  { name:"About This Site", kind:"App", icon:SVG.finder, go:()=>openAbout() }
+];
+function openSpot(){
+  if ($("#spot")) return;
+  const s = el("div"); s.id = "spot";
+  s.innerHTML = `<div class="box" role="dialog" aria-label="Spotlight"><div class="row"><svg viewBox="0 0 16 16"><circle cx="6.8" cy="6.8" r="4.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.4 10.4l3.6 3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="spotIn" placeholder="Spotlight Search" autocomplete="off" spellcheck="false"></div><ul></ul></div>`;
+  document.body.appendChild(s);
+  const inp = $("input",s), ul = $("ul",s); let res = [], sel = 0;
+  const draw = () => {
+    const q = inp.value.trim().toLowerCase();
+    const all = spotIndex();
+    res = !q ? all.slice(0,8) : all.filter(r => r.name.toLowerCase().includes(q) || r.kind.toLowerCase().includes(q) || (r.text||"").toLowerCase().includes(q)).slice(0,10);
+    sel = Math.min(sel, Math.max(0,res.length-1));
+    ul.innerHTML = res.length ? res.map((r,i)=>`<li class="${i===sel?"on":""}" data-i="${i}"><span class="mi">${r.icon}</span>${esc(r.name)}<small>${esc(r.kind)}</small></li>`).join("") : `<li><span class="mi"></span>No results</li>`;
+  };
+  const go = i => { const r = res[i]; close(); r && r.go(); };
+  const close = () => s.remove();
+  inp.addEventListener("input", () => { sel = 0; draw(); });
+  inp.addEventListener("keydown", e => {
+    if (e.key==="ArrowDown"){ sel = Math.min(res.length-1, sel+1); draw(); e.preventDefault(); }
+    else if (e.key==="ArrowUp"){ sel = Math.max(0, sel-1); draw(); e.preventDefault(); }
+    else if (e.key==="Enter") go(sel);
+    else if (e.key==="Escape") close();
+  });
+  ul.addEventListener("click", e => { const li = e.target.closest("li[data-i]"); li && go(+li.dataset.i); });
+  s.addEventListener("pointerdown", e => { if (e.target === s) close(); });
+  draw(); inp.focus();
+}
+$("#spotBtn").onclick = openSpot;
+addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === " ")){ e.preventDefault(); openSpot(); }
+  if (e.key === "Escape"){ closeMenus(); closeBurst(); hideQL(); }
+});
+
+/* ============ Widgets ============ */
+const TODOS = [
+  { t: "scale pythe to 10k mrr", tag: "pythe" },
+  { t: "work at a yc startup", tag: "career" },
+  { t: "economics & management at oxford", tag: "uni" },
+  { t: "start a clothing brand at 13, hit five figures", done: true },
+  { t: "co-found pythe with abhi", done: true },
+  { t: "send 732 cold emails in one week", done: true },
+  { t: "1,000+ hours building with ai", done: true }
+];
+const WIDGETS = {
+  photo: () => `<button class="wg sm wg-photo" data-act="about" style="background-image:url(${PROFILE.photo})" aria-label="About ${esc(PROFILE.name)}"><span class="cap"><b>${esc(PROFILE.name)}</b><span>${esc(PROFILE.title)}</span></span></button>`,
+  clock: () => `<div class="wg sm wg-clock" aria-label="Clock"><div class="dial">${Array.from({length:12},(_,i)=>{ const n=i+1, a=n*30*Math.PI/180; return `<span class="num" style="left:${50+Math.sin(a)*38}%;top:${50-Math.cos(a)*38}%">${n}</span>`; }).join("")}<div class="hand hr"></div><div class="hand mn"></div><div class="hand sc"></div><div class="pin"></div></div></div>`,
+  cal: () => {
+    const d = new Date(), y = d.getFullYear(), m = d.getMonth();
+    const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
+    let cells = ["S","M","T","W","T","F","S"].map(x=>`<i class="dh">${x}</i>`).join("") + "<i></i>".repeat(first);
+    for (let n = 1; n <= days; n++){ const wd = (first + n - 1) % 7; cells += `<i class="${n===d.getDate()?"td":(wd===0||wd===6)?"we":""}">${n}</i>`; }
+    return `<div class="wg sm wg-cal" aria-label="Calendar"><div class="cm">${d.toLocaleDateString(undefined,{month:"long"})}</div><div class="cg">${cells}</div></div>`;
+  },
+  pythe: () => `<a class="wg sm wg-pythe" href="${PROFILE.links.pythe}" target="_blank" rel="noopener"><img src="${PROFILE.logo}" alt="Pythe logo"><b>Pythe</b><span>your ai cofounder with a team of ai agents</span><em>next stop: 10k mrr ↗</em></a>`,
+  rem: () => {
+    const row = t => `<li class="${t.done?"done":""}"><button class="rk" data-i="${TODOS.indexOf(t)}" aria-label="Mark ${esc(t.t)}"></button><span>${esc(t.t)}</span>${t.tag?`<em>${t.tag}</em>`:""}</li>`;
+    const open = TODOS.filter(t=>!t.done).length;
+    return `<div class="wg wide wg-rem" aria-label="Reminders"><div class="rh"><span class="ri"><svg viewBox="0 0 16 16" fill="#fff"><circle cx="3" cy="4" r="1.4"/><circle cx="3" cy="8" r="1.4"/><circle cx="3" cy="12" r="1.4"/><rect x="6" y="3.2" width="8" height="1.6" rx=".8"/><rect x="6" y="7.2" width="8" height="1.6" rx=".8"/><rect x="6" y="11.2" width="8" height="1.6" rx=".8"/></svg></span><b>dk's list</b><span class="rc">${open}</span></div><ul>${TODOS.filter(t=>!t.done).map(row).join("")}<li class="sec">done</li>${TODOS.filter(t=>t.done).map(row).join("")}</ul></div>`;
+  }
+};
+$("#widgets").innerHTML = ["photo","clock","cal","pythe","rem"].map(k=>WIDGETS[k]()).join("");
+document.addEventListener("click", ev => {
+  const rk = ev.target.closest(".rk");
+  if (rk){
+    const t = TODOS[+rk.dataset.i]; t.done = !t.done;
+    document.querySelectorAll(`.rk[data-i="${rk.dataset.i}"]`).forEach(b=>b.closest("li").classList.toggle("done", !!t.done));
+    document.querySelectorAll(".wg-rem .rc").forEach(c=>c.textContent = TODOS.filter(x=>!x.done).length);
+    return;
+  }
+  if (ev.target.closest('[data-act="about"]')) isMobile() ? openSheet(DESK_FILES[1]) : openAbout(ev.target.closest(".wg"));
+});
+
+function tick(){
+  const d = new Date();
+  $("#clock").textContent = d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}) + "  " + d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  const s = d.getSeconds(), m = d.getMinutes() + s/60, h = (d.getHours()%12) + m/60;
+  document.querySelectorAll(".dial").forEach(dl => {
+    dl.querySelector(".sc").style.transform = `rotate(${s*6}deg)`;
+    dl.querySelector(".mn").style.transform = `rotate(${m*6}deg)`;
+    dl.querySelector(".hr").style.transform = `rotate(${h*30}deg)`;
+  });
+}
+
+/* ============ Phone home screen ============ */
+const MOBILE_Q = matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1024px)");
+function isMobile(){ return MOBILE_Q.matches; }
+const firstImg = f => (mdOf(f).match(/!\[[^\]]*\]\(([^)\s]+)\)/) || [])[1];
+const fileIcon = f => { const im = firstImg(f); return im ? `<span class="mi m-thumb" style="background-image:url(${im})"></span>` : `<span class="mi m-md"><i></i><i></i><i></i><b>MD</b></span>`; };
+const shortName = n => n.replace(/\.md$/,"");
+function buildMobile(){
+  const grid = $("#mGrid");
+  const apps = [
+    ...Object.entries(FOLDERS).map(([k,F]) => `<button class="m-app" data-fold="${k}"><span class="mi m-fold">${F.files.slice(0,9).map(f=>{ const im = firstImg(f); return `<i${im?` style="background-image:url(${im})"`:""}></i>`; }).join("")}</span><span>${esc(F.name)}</span></button>`),
+    ...DESK_FILES.map((f,i) => `<button class="m-app" data-desk="${i}">${fileIcon(f)}<span>${esc(shortName(f.name))}</span></button>`),
+    `<a class="m-app" href="${PROFILE.links.github}" target="_blank" rel="noopener"><span class="mi">${SVG.github}</span><span>GitHub</span></a>`,
+    `<button class="m-app" data-desk="3"><span class="mi">${SVG.mail}</span><span>Contact</span></button>`
+  ];
+  grid.innerHTML = WIDGETS.photo() + WIDGETS.cal() + WIDGETS.rem() + apps.join("") + WIDGETS.clock() + WIDGETS.pythe();
+  $("#mDock").innerHTML = [["Pythe",SVG.pythe,"pythe"],["LinkedIn",SVG.linkedin,"linkedin"],["Instagram",SVG.instagram,"instagram"],["X",SVG.x,"x"]]
+    .map(([l,ic,k]) => `<a class="m-app" href="${PROFILE.links[k]}" target="_blank" rel="noopener" aria-label="${l}"><span class="mi">${ic}</span></a>`).join("");
+  $("#mHello").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+  grid.addEventListener("click", ev => {
+    const f = ev.target.closest("[data-fold]"); if (f) return openMFolder(f.dataset.fold, f.querySelector(".mi"));
+    const d = ev.target.closest("[data-desk]"); if (d) openSheet(DESK_FILES[+d.dataset.desk]);
+  });
+}
+function openMFolder(key, from){
+  const F = FOLDERS[key];
+  const o = el("div"); o.id = "mfold"; o.setAttribute("role","dialog"); o.setAttribute("aria-label", F.name);
+  o.innerHTML = `<h2>${esc(F.name)}</h2><div class="panel"></div>`;
+  const panel = $(".panel", o);
+  F.files.forEach(f => { const b = el("button","m-app", `${fileIcon(f)}<span>${esc(shortName(f.name))}</span>`); b.onclick = () => openSheet(f); panel.appendChild(b); });
+  document.body.appendChild(o);
+  const r = from.getBoundingClientRect(), fx = r.left + r.width/2, fy = r.top + r.height/2;
+  if (!reduce){
+    o.animate([{opacity:0},{opacity:1}],{duration:250,easing:"ease-out"});
+    const pr = panel.getBoundingClientRect();
+    panel.animate([{transform:`translate(${fx-(pr.left+pr.width/2)}px,${fy-(pr.top+pr.height/2)}px) scale(${r.width/pr.width})`,opacity:.4},{transform:"none",opacity:1}],{duration:420,easing:"cubic-bezier(.3,1.25,.5,1)"});
+    [...panel.children].forEach((b,i) => { const br = b.getBoundingClientRect();
+      b.animate([{transform:`translate(${fx-(br.left+br.width/2)}px,${fy-(br.top+br.height/2)}px) scale(.2) rotate(${(i%3-1)*25}deg)`,opacity:0},{transform:"none",opacity:1}],{duration:560,delay:60+i*45,fill:"backwards",easing:"cubic-bezier(.3,1.45,.55,1)"}); });
+  }
+  const close = () => {
+    if (reduce) return o.remove();
+    const pr = panel.getBoundingClientRect();
+    panel.animate([{transform:"none",opacity:1},{transform:`translate(${fx-(pr.left+pr.width/2)}px,${fy-(pr.top+pr.height/2)}px) scale(${r.width/pr.width})`,opacity:0}],{duration:300,easing:"cubic-bezier(.5,0,.75,0)"});
+    o.animate([{opacity:1},{opacity:0}],{duration:300,fill:"forwards"}).onfinish = () => o.remove();
+  };
+  o.addEventListener("click", e => { if (e.target === o || e.target.tagName === "H2") close(); });
+}
+function openSheet(f){
+  const s = el("div"); s.id = "msheet";
+  s.innerHTML = `<div class="card" role="dialog" aria-label="${esc(f.name)}"><div class="bar"><i class="grab"></i><b>${esc(f.name)}</b><button class="done">Done</button></div><div class="mdwrap"><article class="md">${renderMD(mdOf(f))}</article></div></div>`;
+  document.body.appendChild(s);
+  const card = $(".card", s), bar = $(".bar", s);
+  if (!reduce){ card.animate([{transform:"translateY(100%)"},{transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.9,.3,1)"}); s.animate([{opacity:0},{opacity:1}],{duration:300}); }
+  const close = () => {
+    if (reduce) return s.remove();
+    card.animate([{transform:card.style.transform || "none"},{transform:"translateY(100%)"}],{duration:280,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"});
+    s.animate([{opacity:1},{opacity:0}],{duration:280,fill:"forwards"}).onfinish = () => s.remove();
+  };
+  $(".done", s).onclick = close;
+  s.addEventListener("click", e => { if (e.target === s) close(); });
+  bar.addEventListener("pointerdown", ev => {
+    if (ev.target.closest("button")) return;
+    const sy = ev.clientY; let dy = 0; bar.setPointerCapture(ev.pointerId);
+    const mv = e => { dy = Math.max(0, e.clientY - sy); card.style.transform = `translateY(${dy}px)`; };
+    const up = () => { bar.removeEventListener("pointermove",mv); bar.removeEventListener("pointerup",up);
+      if (dy > 110) close(); else { card.animate([{transform:card.style.transform},{transform:"none"}],{duration:220,easing:"ease-out"}); card.style.transform = ""; } };
+    bar.addEventListener("pointermove",mv); bar.addEventListener("pointerup",up);
+  });
+}
+function applyMode(){ document.body.classList.toggle("mobile", isMobile()); if (isMobile()){ closeBurst(true); hideQL(true); closeMenus(); } }
+buildMobile();
+MOBILE_Q.addEventListener ? MOBILE_Q.addEventListener("change", applyMode) : MOBILE_Q.addListener(applyMode);
+applyMode();
+tick(); setInterval(tick, 1000);
+
+/* ============ Welcome notification ============ */
+if (!isMobile()) setTimeout(() => {
+  const n = el("div","notif", `<span class="ni" style="background:url(${PROFILE.photo}) center/cover;border-radius:50%"></span><div><b>welcome to dk's desktop 👌</b><p>hover a folder and watch it burst. ⌘K searches everything. start with README.md</p></div><small>now</small>`);
+  n.style.cursor = "default";
+  n.onclick = () => { openDoc(DESK_FILES[0]); dismiss(); };
+  const dismiss = () => { n.classList.add("bye"); setTimeout(()=>n.remove(), 400); };
+  document.body.appendChild(n);
+  setTimeout(dismiss, 7000);
+}, 900);
+
+/* open README on wide screens so the first frame shows content */
+if (!isMobile() && innerWidth >= 1100) setTimeout(()=>openDoc(DESK_FILES[0]), 300);
+</script>
