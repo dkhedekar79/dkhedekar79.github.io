@@ -33,7 +33,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:default}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
-#desktop{position:fixed;inset:0;background:#a9cdf2 url("wallpaper.webp") center/cover no-repeat;image-rendering:pixelated;overflow:hidden}
+#desktop{position:fixed;inset:0;background:#a9cdf2 url("wallpaper.webp") center/cover no-repeat;overflow:hidden}
 #desktop::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 120%,rgba(0,0,0,.08),transparent 60%)}
 
 /* Menu bar */
@@ -158,7 +158,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.025)}
 #spot li .mi .pyico{width:24px;height:24px}
 
 /* Phone home screen */
-#mobile{display:none;position:fixed;inset:0;flex-direction:column;background:#a9cdf2 url("wallpaper.webp") 38% center/cover no-repeat;image-rendering:pixelated;overflow:hidden;z-index:1}
+#mobile{display:none;position:fixed;inset:0;flex-direction:column;background:#a9cdf2 url("wallpaper.webp") 38% center/cover no-repeat;overflow:hidden;z-index:1}
 body.mobile #mobile{display:flex}
 body.mobile #desktop,body.mobile #menubar,body.mobile #dockwrap,body.mobile #windows,body.mobile #burst,body.mobile #ql,body.mobile .notif,body.mobile #marquee,body.mobile .menu{display:none!important}
 .m-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 28px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 130px) max(20px,env(safe-area-inset-left,0px))}
