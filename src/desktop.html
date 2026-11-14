@@ -1599,7 +1599,7 @@ const MUSIC = {
     ["worry - ultra slowed","LONOWN, riserayss","4:15","18j6GCxt5aFKbYqdvksL7N"]
   ]
 };
-const mState = { i: 0, t: 34, playing: true };
+const mState = { i: 0, t: 0, dur: 0, playing: false, wasPlaying: false, lastPos: 0 };
 const secs = d => { const [m,s] = d.split(":").map(Number); return m*60+s; };
 const fmt = n => `${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,"0")}`;
 const ICO = {
@@ -1608,11 +1608,11 @@ const ICO = {
   prev:'<svg viewBox="0 0 16 16"><rect x="2" y="3" width="2" height="10" rx="1"/><path d="M14 3v10L5.5 8z"/></svg>',
   next:'<svg viewBox="0 0 16 16"><rect x="12" y="3" width="2" height="10" rx="1"/><path d="M2 3v10l8.5-5z"/></svg>'
 };
-WIDGETS.music = () => `<div class="wg wide wg-music playing" aria-label="Music">
+WIDGETS.music = () => `<div class="wg wide wg-music" aria-label="Music">
   <button class="art" data-music="open" aria-label="Open the playlist" style="background-image:url(${MUSIC.cover})"><i><svg viewBox="0 0 16 16" fill="#000"><path d="M3 6c3.5-1.2 7-1 10 .8M3.6 8.5c3-.9 5.8-.7 8.3.7M4.2 10.9c2.4-.6 4.6-.5 6.6.6" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></i></button>
-  <button class="meta" data-music="open"><em><span class="eq"><i></i><i></i><i></i></span>now playing</em><b class="mt"></b><span class="ma"></span></button>
+  <button class="meta" data-music="open"><em><span class="eq"><i></i><i></i><i></i></span><span class="ms">tap play</span></em><b class="mt"></b><span class="ma"></span></button>
   <div class="ctl"><span class="t mc">0:00</span><span class="bar"><i class="mb"></i></span><span class="t md2"></span>
-    <button data-music="prev" aria-label="Previous">${ICO.prev}</button><button class="pp" data-music="pp" aria-label="Pause">${ICO.pause}</button><button data-music="next" aria-label="Next">${ICO.next}</button></div>
+    <button data-music="prev" aria-label="Previous">${ICO.prev}</button><button class="pp" data-music="pp" aria-label="Play">${ICO.play}</button><button data-music="next" aria-label="Next">${ICO.next}</button></div>
 </div>`;
 function drawMusic(){
   const [title, artist, dur] = MUSIC.tracks[mState.i], d = secs(dur);
@@ -1627,7 +1627,6 @@ function drawMusic(){
   });
 }
 function skip(n){ mState.i = (mState.i + n + MUSIC.tracks.length) % MUSIC.tracks.length; mState.t = 0; drawMusic(); }
-setInterval(() => { if (!mState.playing) return; mState.t++; if (mState.t >= secs(MUSIC.tracks[mState.i][2])) skip(1); else drawMusic(); }, 1000);
 /* real playback: Spotify's embed player, driven through its iFrame API */
 let spot = null, spotLoaded = -1;
 window.onSpotifyIframeApiReady = IFrameAPI => {
