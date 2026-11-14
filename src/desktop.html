@@ -1646,6 +1646,9 @@ window.onSpotifyIframeApiReady = IFrameAPI => {
 (() => { const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc); })();
 function onSpot(d){
   if (!d) return;
+  const want = "spotify:track:" + MUSIC.tracks[mState.i][3];
+  if (d.playingURI && d.playingURI !== want) return; // late update from the previous track
+  mState.uri = d.playingURI || want;
   const ended = !mState.advancing && mState.wasPlaying && d.duration > 0 &&
     (d.position >= d.duration - 250 || (d.isPaused && d.position === 0 && mState.lastPos >= d.duration - 1500));
   mState.playing = !d.isPaused;
@@ -1659,8 +1662,15 @@ function onSpot(d){
 function playTrack(i){
   mState.i = i; mState.t = 0; mState.dur = 0; mState.lastPos = 0;
   if (!spot){ drawMusic(); return; }
-  if (spotLoaded !== i){ spot.loadUri("spotify:track:" + MUSIC.tracks[i][3]); spotLoaded = i; setTimeout(() => spot.play(), 400); }
-  else spot.play();
+  const uri = "spotify:track:" + MUSIC.tracks[i][3];
+  if (spotLoaded !== i){ spot.loadUri(uri); spotLoaded = i; }
+  // a freshly loaded embed can ignore the first play(), so keep asking until it reports this track playing
+  let tries = 0; clearInterval(mState.retry);
+  mState.retry = setInterval(() => {
+    if ((mState.playing && mState.uri === uri) || ++tries > 10) return clearInterval(mState.retry);
+    spot.play();
+  }, 600);
+  spot.play();
   drawMusic();
 }
 
