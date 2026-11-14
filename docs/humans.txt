@@ -1,0 +1,9 @@
+/* TEAM */
+Founder: Daiwik Khedekar
+Site: https://dkhedekar79.github.io
+X: @daiwikbuilds
+Email: daiwik@pythe.app
+
+/* SITE */
+Last update: 2026-11-14
+Standards: HTML, CSS, JavaScript
