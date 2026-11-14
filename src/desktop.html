@@ -1071,14 +1071,13 @@ function openBurst(it){
   files.forEach((f, i) => {
     const row = Math.floor(i / cols), inRow = row === rows-1 ? n - row*cols : cols;
     const col = i - row*cols, rowOffset = (cols - inRow) * (cardW + gapX) / 2;
-    const t = n === 1 ? 0 : (i/(n-1) - .5);
     const x = bx + rowOffset + col*(cardW + gapX), y = by + row*(cardH + gapY);
     const s = snippet(f.md);
     const c = el("button","bcard");
     c.style.left = x+"px"; c.style.top = y+"px";
     c.style.setProperty("--dx", (cx - (x+cardW/2))+"px");
     c.style.setProperty("--dy", (cy - (y+cardH/2))+"px");
-    c.style.setProperty("--r", (t*14).toFixed(1)+"deg");
+    c.style.setProperty("--r", "0deg");
     c.style.setProperty("--d", (i*45)+"ms");
     c.style.setProperty("--d2", ((n-1-i)*25)+"ms");
     c.innerHTML = `<div class="page" data-ext="MD"><b>${esc(s.title)}</b>${esc(s.body)}<i style="width:90%"></i><i style="width:70%"></i><i style="width:82%"></i></div><div class="nm">${esc(f.name)}</div>`;
