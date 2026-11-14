@@ -8,6 +8,7 @@ Daiwik Khedekar (also written as Daiwik, or dk) is the CEO and co-founder of Pyt
 
 - [About Daiwik Khedekar](https://daiwikkhedekar.me/about/): Daiwik Khedekar is a 16-year-old UK founder and the CEO of Pythe, an AI cofounder with a team of AI agents. He started his first company, Krzna LDN, at 13.
 - [Contact Daiwik Khedekar](https://daiwikkhedekar.me/contact/): How to contact Daiwik Khedekar - email daiwik@pythe.app, LinkedIn, X @daiwikbuilds, Instagram @dwk.z and GitHub dkhedekar79.
+- [Design portfolio, Daiwik Khedekar](https://daiwikkhedekar.me/design/): Posters and brand design by Daiwik Khedekar for Black Box, Loops, Pythe and Railway. Graphic designer for companies since 14.
 - [Now, what Daiwik Khedekar is working on](https://daiwikkhedekar.me/now/): What Daiwik Khedekar is focused on right now - scaling Pythe to 10k MRR, outreach, and applying for Economics & Management at Oxford.
 - [Black Box, the flight recorder for AI agents](https://daiwikkhedekar.me/projects/black-box/): Black Box records every model and tool call an AI agent makes in a tamper-evident SHA-256 hash chain that anyone can verify offline. A project by Daiwik Khedekar.
 - [Creddr, finance careers from zero](https://daiwikkhedekar.me/projects/creddr/): Creddr helps people with no finance background land a first finance role, starting with private equity. Built by Daiwik Khedekar.
