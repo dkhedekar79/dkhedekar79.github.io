@@ -9,6 +9,7 @@ im daiwik khedekar. 16, ceo of [pythe](https://www.pythe.app), your ai cofounder
 ## whats in here
 
 - **the desktop** (`src/desktop.html`): folders that burst open on hover, markdown files you can quick look, a terminal, spotlight (`⌘K`), a dock with my socials, and an iphone home screen when youre on mobile
+- **music widget**: plays the #1 larping playlist for real through spotify's embed player. play, pause, skip, auto next. signed into spotify = full songs, otherwise 30 sec previews
 - **static pages** (`content/`): every page also exists as plain html so search engines and ai models can read it
 - **seo, geo, aeo, llmo**: schema.org person, organization, faq and breadcrumb data, a sitemap, robots.txt that welcomes ai crawlers, `llms.txt` and `llms-full.txt`
 
