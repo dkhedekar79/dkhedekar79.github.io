@@ -1,6 +1,6 @@
 ---
 title: Design portfolio, Daiwik Khedekar
-description: Posters and brand design by Daiwik Khedekar for Black Box, Loops, Pythe and Railway. Graphic designer for companies since 14.
+description: Posters and brand design by Daiwik Khedekar for Black Box, Loops, Pythe, Railway, Lantern and Sona8. Graphic designer for companies since 14.
 slug: design
 image: img/design/black-box-try-cutting-a-link.jpg
 ---
@@ -37,5 +37,19 @@ brushed steel with pythe stamped all over it. scratch through and the path is al
 ![Railway poster: derailing is optional](/img/design/railway-derailing-is-optional.jpg)
 
 black and white tracks, one purple signal. the switch decides where the train goes
+
+## whos actually done it?
+<div class="meta">lantern</div>
+
+![Lantern poster: who's actually done it?](/img/design/lantern-whos-actually-done-it.jpg)
+
+an old painting, three faces in the dark, one lantern lit in orange. the question mark carries the same orange
+
+## hear from everyone in your company.
+<div class="meta">sona8</div>
+
+![Sona8 poster: hear from everyone in your company](/img/design/sona8-hear-from-everyone.jpg)
+
+an old acoustic listening machine. four horns lit purple, arranged like the sona8 logo
 
 -dk
