@@ -1061,17 +1061,18 @@ function openBurst(it){
   const r = it.el.querySelector(".art").getBoundingClientRect();
   const cx = r.left + r.width/2, cy = r.top + r.height/2;
   const n = files.length;
-  // fan toward the screen's centre
-  const base = Math.atan2(innerHeight*0.45 - cy, innerWidth*0.5 - cx);
-  const spread = Math.min(Math.PI*0.9, 0.5 * (n-1) + 0.001);
-  const radius = 190 + n*22;
-  const cardW = 104, cardH = 128;
+  // lay the files out on an even grid beside the folder, facing the middle of the screen
+  const cardW = 104, cardH = 146, gapX = 18, gapY = 16;
+  const cols = n <= 3 ? n : n <= 6 ? 3 : 4, rows = Math.ceil(n / cols);
+  const blockW = cols*cardW + (cols-1)*gapX, blockH = rows*cardH + (rows-1)*gapY;
+  const toRight = cx < innerWidth / 2;
+  const bx = toRight ? Math.min(r.right + 28, innerWidth - blockW - 12) : Math.max(12, r.left - 28 - blockW);
+  const by = Math.min(Math.max(40, cy - blockH/2), innerHeight - blockH - 96);
   files.forEach((f, i) => {
+    const row = Math.floor(i / cols), inRow = row === rows-1 ? n - row*cols : cols;
+    const col = i - row*cols, rowOffset = (cols - inRow) * (cardW + gapX) / 2;
     const t = n === 1 ? 0 : (i/(n-1) - .5);
-    const a = base + t*spread;
-    let x = cx + Math.cos(a)*radius - cardW/2, y = cy + Math.sin(a)*radius - cardH/2;
-    x = Math.min(Math.max(8, x), innerWidth - cardW - 8);
-    y = Math.min(Math.max(36, y), innerHeight - cardH - 96);
+    const x = bx + rowOffset + col*(cardW + gapX), y = by + row*(cardH + gapY);
     const s = snippet(f.md);
     const c = el("button","bcard");
     c.style.left = x+"px"; c.style.top = y+"px";
