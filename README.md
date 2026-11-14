@@ -2,7 +2,7 @@
 
 my personal site. its a desktop. click stuff
 
-**live:** https://dkhedekar79.github.io
+**live:** https://daiwikkhedekar.me
 
 im daiwik khedekar. 16, ceo of [pythe](https://www.pythe.app), your ai cofounder with a team of ai agents to build anything
 
