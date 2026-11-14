@@ -62,7 +62,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:default}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
-#desktop{position:fixed;inset:0;background:#a9cdf2 url("wallpaper.webp?v=20324a67") center/cover no-repeat;overflow:hidden}
+#desktop{position:fixed;inset:0;background:#a9cdf2 url("wallpaper.webp?v=cc3aa48f") center/cover no-repeat;overflow:hidden}
 #desktop::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 120%,rgba(0,0,0,.08),transparent 60%)}
 
 /* Menu bar */
@@ -187,7 +187,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.025)}
 #spot li .mi .pyico{width:24px;height:24px}
 
 /* Phone home screen */
-#mobile{display:none;position:fixed;inset:0;flex-direction:column;background:#a9cdf2 url("wallpaper.webp?v=20324a67") 38% center/cover no-repeat;overflow:hidden;z-index:1}
+#mobile{display:none;position:fixed;inset:0;flex-direction:column;background:#a9cdf2 url("wallpaper.webp?v=cc3aa48f") 38% center/cover no-repeat;overflow:hidden;z-index:1}
 body.mobile #mobile{display:flex}
 body.mobile #desktop,body.mobile #menubar,body.mobile #dockwrap,body.mobile #windows,body.mobile #burst,body.mobile #ql,body.mobile .notif,body.mobile #marquee,body.mobile .menu{display:none!important}
 .m-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 28px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 130px) max(20px,env(safe-area-inset-left,0px))}
@@ -503,6 +503,47 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .spot-embed{flex:1;display:flex;flex-direction:column;background:#121212;color:#fff}
 .spot-embed iframe{flex:1;width:100%;border:0;min-height:352px}
 .spot-embed a{display:block;padding:10px 14px;font-size:12px;color:#1ed760;text-decoration:none;border-top:1px solid #2a2a2a}
+
+/* ===== Night pass: floating dark-glass menu bar to suit the dark silk wallpaper ===== */
+#menubar{top:9px;left:0;right:0;height:32px;padding:0 max(14px,env(safe-area-inset-left,0px));background:none;box-shadow:none;pointer-events:none;color:#e9ebff;font-size:12.5px;font-weight:500;letter-spacing:.005em}
+#menubar::before{display:none}
+.mb-l,.mb-r{pointer-events:auto;height:32px;padding:0 6px;gap:1px;border-radius:16px;position:relative;isolation:isolate;
+  background:linear-gradient(180deg,rgba(40,42,74,.62),rgba(20,22,40,.66));
+  backdrop-filter:blur(26px) saturate(1.7);-webkit-backdrop-filter:blur(26px) saturate(1.7);
+  box-shadow:inset 0 .5px 0 rgba(255,255,255,.22),inset 0 0 0 .5px rgba(150,160,255,.18),0 6px 22px rgba(4,5,18,.45)}
+.mb-item{height:24px;padding:0 10px;border-radius:12px;color:inherit;transition:background .15s}
+.mb-item:hover,.mb-item.open{background:rgba(140,150,255,.22)}
+.mb-app{font-weight:650;color:#fff}
+.mb-logo{padding:0 9px}
+.mb-r .mb-item{padding:0 8px}
+#menubar svg *[fill="#14161b"]{fill:currentColor}
+#menubar svg *[stroke="#14161b"]{stroke:currentColor}
+#clock{font-weight:600;color:#fff}
+.menu{top:48px;background:rgba(24,26,46,.78);color:#e9ebff;border-radius:14px;padding:6px;
+  backdrop-filter:blur(34px) saturate(1.7);-webkit-backdrop-filter:blur(34px) saturate(1.7);
+  box-shadow:inset 0 .5px 0 rgba(255,255,255,.2),0 0 0 .5px rgba(150,160,255,.22),0 16px 44px rgba(3,4,16,.55)}
+.menu button:hover,.menu a:hover{background:#6b72f0;color:#fff}
+.menu hr{border-top-color:rgba(190,196,255,.16)}
+.menu kbd,.menu .dis{color:rgba(205,210,255,.5)}
+#widgets{top:58px}
+
+/* widgets on the dark wallpaper: dark glass, light text */
+.wg{--lg-ink:#f3f4ff;--lg-ink-2:rgba(216,221,255,.7);--lg-fill:rgba(24,26,52,.52);color:var(--lg-ink)}
+.wg-photo{color:#fff}
+.dial{background:rgba(20,22,46,.55);box-shadow:inset 0 1px 1px rgba(255,255,255,.18),inset 0 -2px 6px rgba(0,0,0,.25)}
+.wg-cal .cg{color:#eef0ff}
+.wg-cal .dh,.wg-cal .we{color:rgba(205,211,255,.55)}
+.wg-cal .cm{color:#ff6b62}
+.wg-pythe b{color:#fff}
+.wg-pythe em,.wg-rem .rh b{color:#9cc2ff}
+.wg-rem li{color:#f3f4ff;border-top-color:rgba(200,206,255,.14)}
+.wg-rem li.sec{color:rgba(205,211,255,.6)}
+.wg-rem .rk{border-color:rgba(205,211,255,.5)}
+.wg-rem li.done .rk{background:#6aa2ff;border-color:#6aa2ff;box-shadow:inset 0 0 0 2.5px #1a1c36}
+.wg-rem li.done span{color:rgba(205,211,255,.55)}
+.wg-rem em{color:#ffb84d;background:rgba(255,160,40,.2)}
+.wg-music .bar{background:rgba(205,211,255,.2)}
+.wg-music .ctl button:hover{background:rgba(205,211,255,.2)}
 </style>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
 </head>
