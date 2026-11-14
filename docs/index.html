@@ -544,6 +544,17 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .wg-rem em{color:#ffb84d;background:rgba(255,160,40,.2)}
 .wg-music .bar{background:rgba(205,211,255,.2)}
 .wg-music .ctl button:hover{background:rgba(205,211,255,.2)}
+
+/* ===== Dock: calm scale (no layout shift), one soft hop, dark glass ===== */
+.dk .ico{transform:scale(var(--k,1));transform-origin:50% 100%;transition:transform .16s cubic-bezier(.2,.7,.3,1)}
+.dk.bounce .ico{animation:none}
+.dk.bounce{animation:dkhop .5s cubic-bezier(.3,0,.3,1) 1}
+@keyframes dkhop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14%)}}
+.dk .tip{bottom:calc(100% + 28px);background:rgba(24,26,46,.82);color:#f1f2ff;box-shadow:inset 0 .5px 0 rgba(255,255,255,.18),0 0 0 .5px rgba(150,160,255,.22),0 6px 18px rgba(3,4,16,.5);transition:opacity .15s .05s}
+.dk .tip::after{border-top-color:rgba(24,26,46,.82)}
+.dk .dot{background:rgba(235,238,255,.85)}
+#dock{background:linear-gradient(180deg,rgba(40,42,74,.55),rgba(20,22,40,.6));box-shadow:inset 0 .5px 0 rgba(255,255,255,.22),inset 0 0 0 .5px rgba(150,160,255,.18),0 10px 30px rgba(4,5,18,.5)}
+.dsep{background:rgba(200,206,255,.2)}
 </style>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
 </head>
@@ -1474,7 +1485,7 @@ DOCK.forEach(d => {
   a.setAttribute("aria-label", d.label);
   if (d.href){ a.href = d.href(); a.target = "_blank"; a.rel = "noopener"; }
   a.addEventListener("click", () => {
-    if (!reduce){ a.classList.remove("bounce"); void a.offsetWidth; a.classList.add("bounce"); setTimeout(()=>a.classList.remove("bounce"), 1900); }
+    if (!reduce){ a.classList.remove("bounce"); void a.offsetWidth; a.classList.add("bounce"); setTimeout(()=>a.classList.remove("bounce"), 700); }
     if (d.run) d.run(a.querySelector(".ico"));
   });
   dockEls[d.id] = a; dock.appendChild(a);
@@ -1502,18 +1513,17 @@ function setDockBase(){
   items.forEach(i => i.style.setProperty("--s", BASE+"px"));
 }
 setDockBase(); addEventListener("resize", setDockBase);
-const MAX = 1.85, RANGE = 160;
+const MAX = 1.3, RANGE = 100;   // gentle scale only; layout never moves
 dock.addEventListener("pointermove", ev => {
-  if (ev.pointerType === "touch") return;
-  dock.classList.add("live");
+  if (ev.pointerType === "touch" || reduce) return;
   dock.querySelectorAll(".dk").forEach(i => {
     const r = i.getBoundingClientRect(); const c = r.left + r.width/2;
     const d = Math.abs(ev.clientX - c);
     const k = d > RANGE ? 0 : Math.cos((d/RANGE) * Math.PI/2);
-    i.style.setProperty("--s", (BASE * (1 + (MAX-1)*k*k)) + "px");
+    i.style.setProperty("--k", (1 + (MAX-1)*k*k).toFixed(3));
   });
 });
-dock.addEventListener("pointerleave", () => { dock.classList.remove("live"); dock.querySelectorAll(".dk").forEach(i=>i.style.setProperty("--s", BASE+"px")); });
+dock.addEventListener("pointerleave", () => { dock.querySelectorAll(".dk").forEach(i=>i.style.setProperty("--k", 1)); });
 renderMinis();
 
 /* ============ Menus ============ */
