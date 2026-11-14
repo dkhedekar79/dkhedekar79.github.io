@@ -1646,13 +1646,14 @@ window.onSpotifyIframeApiReady = IFrameAPI => {
 (() => { const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc); })();
 function onSpot(d){
   if (!d) return;
-  const ended = d.isPaused && mState.wasPlaying && d.duration > 0 && (d.position >= d.duration - 1500 || (d.position === 0 && mState.lastPos >= d.duration - 1500));
+  const ended = !mState.advancing && mState.wasPlaying && d.duration > 0 &&
+    (d.position >= d.duration - 250 || (d.isPaused && d.position === 0 && mState.lastPos >= d.duration - 1500));
   mState.playing = !d.isPaused;
   mState.wasPlaying = mState.playing;
   mState.t = d.position / 1000;
   mState.dur = d.duration / 1000;
   mState.lastPos = d.position;
-  if (ended){ mState.wasPlaying = true; return playTrack((mState.i + 1) % MUSIC.tracks.length); }
+  if (ended){ mState.wasPlaying = true; mState.advancing = true; setTimeout(() => { mState.advancing = false; }, 2500); return playTrack((mState.i + 1) % MUSIC.tracks.length); }
   drawMusic();
 }
 function playTrack(i){
