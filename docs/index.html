@@ -119,6 +119,7 @@ a{color:inherit}
 .bcard .page b{display:block;font-size:8px;margin-bottom:3px;color:#111}
 .bcard .page i{display:block;height:3px;background:#e4e7ee;border-radius:2px;margin:3px 0}
 .bcard .page::after{content:attr(data-ext);position:absolute;right:6px;bottom:6px;font:700 7px/1 var(--font);color:#fff;background:#6b7280;border-radius:3px;padding:2px 4px}
+.bcard .page.img{padding:0;background:#15171c center/cover no-repeat}
 .bcard .page.folder::after{background:var(--accent)}
 .bcard .page.link::after{background:#16a34a}
 .bcard .nm{font-size:11px;font-weight:600;color:#fff;text-shadow:0 0 4px rgba(4,18,40,.75),0 1px 2px rgba(4,18,40,.7);max-width:104px;text-align:center;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -278,6 +279,7 @@ body.mobile #desktop,body.mobile #menubar,body.mobile #dockwrap,body.mobile #win
 .fitem.sel{background:var(--select)}
 .fitem .art{height:58px;display:grid;place-items:center}
 .fitem span{overflow-wrap:anywhere}
+.fitem .fthumb{display:block;width:46px;height:58px;border-radius:4px;background:#15171c center/cover no-repeat;box-shadow:0 0 0 .5px rgba(0,0,0,.2),0 3px 8px rgba(0,0,0,.2)}
 .fpath{height:26px;flex:none;border-top:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11px;color:var(--ink-3);background:#f6f7f9}
 .fnav{display:flex;gap:2px}
 .fnav button{width:28px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--ink-2)}
@@ -559,7 +561,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
 </head>
 <body>
-<main class="sr-only"><h1>Daiwik Khedekar</h1><p>Daiwik Khedekar is a 16-year-old founder from the UK and the CEO of Pythe, an AI cofounder with a team of AI agents that research, write, build and ship a startup&#x27;s work. He started his first company, the clothing brand Krzna LDN, at 13, worked as a graphic designer for companies at 14, and has also built Black Box, Trackviso and Creddr.</p><nav aria-label="Pages"><ul><li><a href="/about/">about</a></li><li><a href="/projects/">projects</a></li><li><a href="/skills/">skills</a></li><li><a href="/now/">now</a></li><li><a href="/faq/">faq</a></li><li><a href="/contact/">contact</a></li></ul></nav></main>
+<main class="sr-only"><h1>Daiwik Khedekar</h1><p>Daiwik Khedekar is a 16-year-old founder from the UK and the CEO of Pythe, an AI cofounder with a team of AI agents that research, write, build and ship a startup&#x27;s work. He started his first company, the clothing brand Krzna LDN, at 13, worked as a graphic designer for companies at 14, and has also built Black Box, Trackviso and Creddr.</p><nav aria-label="Pages"><ul><li><a href="/about/">about</a></li><li><a href="/projects/">projects</a></li><li><a href="/design/">design</a></li><li><a href="/skills/">skills</a></li><li><a href="/now/">now</a></li><li><a href="/faq/">faq</a></li><li><a href="/contact/">contact</a></li></ul></nav></main>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <linearGradient id="gFolderBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5eb6f2"/><stop offset="1" stop-color="#2f8fdc"/></linearGradient>
@@ -721,6 +723,48 @@ it made five figures and i genuinely thought i had cracked business forever
 i had not
 
 but it taught me the thing i still believe now: the product is half of it, selling it is the other half
+
+-dk` }
+  ]},
+  design: { name: "Design", tag: "#f97316", files: [
+    { name: "Try cutting a link.md", md: `# try cutting a link.
+<div class="meta">poster · black box</div>
+
+![Black Box poster: try cutting a link](img/design/black-box-try-cutting-a-link.jpg)
+
+black box seals every agent action into a hash chain. so the poster is a chain
+
+cut one link and it glows. thats the whole product in one image
+
+-dk` },
+    { name: "Loop them in.md", md: `# loop them in.
+<div class="meta">poster · loops</div>
+
+![Loops poster: loop them in](img/design/loops-loop-them-in.jpg)
+
+rope, knots, one orange accent
+
+the loop is literally in the picture. you dont need to explain it
+
+-dk` },
+    { name: "Don't start from scratch.md", md: `# dont start from scratch.
+<div class="meta">poster · pythe</div>
+
+![Pythe poster: don't start from scratch](img/design/pythe-dont-start-from-scratch.jpg)
+
+brushed steel with pythe stamped all over it
+
+scratch through the metal and the path is already there: research, roadmap, canvas
+
+-dk` },
+    { name: "Derailing is optional.md", md: `# derailing is optional.
+<div class="meta">poster · railway</div>
+
+![Railway poster: derailing is optional](img/design/railway-derailing-is-optional.jpg)
+
+black and white tracks, one purple signal
+
+the switch decides where the train goes. same idea as deploying on railway
 
 -dk` }
   ]},
@@ -1167,7 +1211,10 @@ function openBurst(it){
     c.style.setProperty("--r", "0deg");
     c.style.setProperty("--d", (i*35)+"ms");
     c.style.setProperty("--d2", ((n-1-i)*25)+"ms");
-    c.innerHTML = `<div class="page" data-ext="MD"><b>${esc(s.title)}</b>${esc(s.body)}<i style="width:90%"></i><i style="width:70%"></i><i style="width:82%"></i></div><div class="nm">${esc(f.name)}</div>`;
+    const im = firstImg(f);
+    c.innerHTML = im
+      ? `<div class="page img" data-ext="MD" style="background-image:url(${im})"></div><div class="nm">${esc(f.name)}</div>`
+      : `<div class="page" data-ext="MD"><b>${esc(s.title)}</b>${esc(s.body)}<i style="width:90%"></i><i style="width:70%"></i><i style="width:82%"></i></div><div class="nm">${esc(f.name)}</div>`;
     c.addEventListener("click", () => { const origin = c; openDoc(f, origin); closeBurst(); });
     burstEl.appendChild(c);
   });
@@ -1368,7 +1415,8 @@ function navTo(W, key, noHist){
   const grid = $(".fgrid",W.body); grid.innerHTML = "";
   const items = folderContents(key);
   items.forEach((it,i) => {
-    const b = el("button","fitem", `<div class="art">${it.kind==="folder"?SVG.folder(58):SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
+    const thumb = it.kind === "file" && firstImg(it.file);
+    const b = el("button","fitem", `<div class="art">${it.kind==="folder"?SVG.folder(58):thumb?`<span class="fthumb" style="background-image:url(${thumb})"></span>`:SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
     b.onclick = () => { grid.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
     b.ondblclick = () => it.kind==="folder" ? navTo(W, it.key) : openDoc(it.file, b);
     b.onkeydown = e => { if (e.key==="Enter") b.ondblclick(); };
