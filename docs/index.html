@@ -1033,11 +1033,14 @@ function layoutIcons(){
   const W = innerWidth, H = innerHeight - 28 - 100;
   const cell = W < 760 ? 86 : 90, colW = W < 760 ? 84 : 88;
   const rows = Math.max(1, Math.floor((H - 10) / cell));
+  const inset = W < 760 ? 14 : Math.round(Math.min(150, Math.max(60, W * .07)));
+  const used = Math.min(rows, desktopItems.length);
+  const topPad = W < 760 ? 14 : Math.max(14, Math.round((H - used*cell) / 2.6));
   desktopItems.forEach((it, i) => {
     if (userPos.has(i)){ const p = userPos.get(i); it.el.style.left = p.x+"px"; it.el.style.top = p.y+"px"; return; }
     const col = Math.floor(i / rows), row = i % rows;
-    it.el.style.left = (W - 14 - colW*(col+1)) + "px";
-    it.el.style.top = (14 + row*cell) + "px";
+    it.el.style.left = (W - inset - colW*(col+1)) + "px";
+    it.el.style.top = (topPad + row*cell) + "px";
   });
 }
 layoutIcons(); addEventListener("resize", () => { layoutIcons(); closeBurst(true); });
