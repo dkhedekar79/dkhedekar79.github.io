@@ -64,7 +64,7 @@ FAQ = [
      "Email daiwik@pythe.app, or message him on LinkedIn (daiwik-khedekar), X (@daiwikbuilds) or Instagram (@dwk.z)."),
 ]
 
-NAV = [("/", "desktop"), ("/about/", "about"), ("/projects/", "projects"), ("/skills/", "skills"),
+NAV = [("/", "desktop"), ("/about/", "about"), ("/projects/", "projects"), ("/design/", "design"), ("/skills/", "skills"),
        ("/now/", "now"), ("/faq/", "faq"), ("/contact/", "contact")]
 
 
@@ -332,7 +332,7 @@ def build():
                            [website_ld()], '<h1>404</h1><p>this page doesnt exist. <a href="/">back to the desktop</a></p>', "website")
           .replace('<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">', '<meta name="robots" content="noindex">'))
 
-    urls = ["/", "/about/", "/projects/"] + [f"/{p['slug']}/" for p in projects] + ["/skills/", "/now/", "/faq/", "/contact/"]
+    urls = ["/", "/about/", "/projects/"] + [f"/{p['slug']}/" for p in projects] + ["/design/", "/skills/", "/now/", "/faq/", "/contact/"]
     write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"  <url><loc>{SITE}{u}</loc><lastmod>{TODAY}</lastmod><priority>{'1.0' if u == '/' else '0.8'}</priority></url>\n" for u in urls)
           + "</urlset>\n")
