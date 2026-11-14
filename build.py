@@ -16,7 +16,7 @@ import re
 
 ROOT = pathlib.Path(__file__).parent
 OUT = ROOT / "docs"
-SITE = "https://dkhedekar79.github.io"
+SITE = "https://daiwikkhedekar.me"
 TODAY = datetime.date.today().isoformat()
 
 PERSON = {
@@ -359,6 +359,7 @@ def build():
                   {"src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"}]}, indent=2))
     write("humans.txt", f"/* TEAM */\nFounder: Daiwik Khedekar\nSite: {SITE}\nX: @daiwikbuilds\nEmail: {PERSON['email']}\n\n/* SITE */\nLast update: {TODAY}\nStandards: HTML, CSS, JavaScript\n")
     write(".nojekyll", "")
+    write("CNAME", SITE.split("//")[1] + "\n")
     print(f"built {len(list(OUT.rglob('*.html')))} pages into docs/")
 
 
