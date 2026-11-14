@@ -1162,7 +1162,7 @@ function openBurst(it){
   const n = files.length;
   // lay the files out on an even grid beside the folder, facing the middle of the screen
   const cardW = 104, cardH = 146, gapX = 18, gapY = 16;
-  const cols = n <= 3 ? n : n <= 6 ? 3 : 4, rows = Math.ceil(n / cols);
+  const cols = n <= 4 ? n : n <= 6 ? 3 : 4, rows = Math.ceil(n / cols);
   const blockW = cols*cardW + (cols-1)*gapX, blockH = rows*cardH + (rows-1)*gapY;
   const toRight = cx < innerWidth / 2;
   const bx = toRight ? Math.min(r.right + 28, innerWidth - blockW - 12) : Math.max(12, r.left - 28 - blockW);
