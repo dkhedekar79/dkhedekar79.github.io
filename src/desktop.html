@@ -470,6 +470,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .eq i{width:2px;height:3px;background:#1ed760;border-radius:1px}
 .eq i:nth-child(2){animation-delay:.3s!important}.eq i:nth-child(3){animation-delay:.6s!important}
 @keyframes eq{to{height:9px}}
+.spot-hidden{position:fixed;left:0;bottom:0;width:300px;height:80px;opacity:0;pointer-events:none;z-index:-1;overflow:hidden}
 .spot-embed{flex:1;display:flex;flex-direction:column;background:#121212;color:#fff}
 .spot-embed iframe{flex:1;width:100%;border:0;min-height:352px}
 .spot-embed a{display:block;padding:10px 14px;font-size:12px;color:#1ed760;text-decoration:none;border-top:1px solid #2a2a2a}
@@ -1627,6 +1628,20 @@ function drawMusic(){
 }
 function skip(n){ mState.i = (mState.i + n + MUSIC.tracks.length) % MUSIC.tracks.length; mState.t = 0; drawMusic(); }
 setInterval(() => { if (!mState.playing) return; mState.t++; if (mState.t >= secs(MUSIC.tracks[mState.i][2])) skip(1); else drawMusic(); }, 1000);
+/* real playback: Spotify's embed player, driven through its iFrame API */
+let spot = null, spotLoaded = -1;
+window.onSpotifyIframeApiReady = IFrameAPI => {
+  const mount = el("div","spot-hidden"); mount.setAttribute("aria-hidden","true");
+  const slot = el("div"); mount.appendChild(slot); document.body.appendChild(mount);
+  IFrameAPI.createController(slot, { uri: "spotify:track:" + MUSIC.tracks[mState.i][3], width: 300, height: 80 }, c => {
+    spot = c; spotLoaded = mState.i;
+    c.addListener("playback_update", e => onSpot(e.data));
+    drawMusic();
+  });
+};
+(() => { const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc); })();
+function onSpot(d){}
+
 function openMusic(origin){
   if (isMobile()){ const a = el("a"); a.href = MUSIC.url; a.target = "_blank"; a.rel = "noopener"; a.click(); return; }
   const W = createWin({ id:"spotify", title:MUSIC.name, app:"Spotify", w:420, h:480, origin });
