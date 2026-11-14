@@ -455,7 +455,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .wg-music .art i svg{width:9px;height:9px}
 .wg-music .meta{min-width:0;cursor:pointer;background:none;border:0;padding:0;text-align:left;color:inherit}
 .wg-music .meta b{display:block;font:650 12.5px/1.25 var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wg-music .meta span{display:block;font-size:11px;color:var(--lg-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wg-music .meta>span{display:block;font-size:11px;color:var(--lg-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wg-music .meta em{font-style:normal;font-size:9.5px;font-weight:600;color:var(--lg-ink-2);text-transform:uppercase;letter-spacing:.05em}
 .wg-music .ctl{display:flex;align-items:center;gap:8px;min-width:0}
 .wg-music .bar{flex:1;height:4px;border-radius:2px;background:rgba(15,27,45,.15);overflow:hidden}
@@ -1615,14 +1615,15 @@ WIDGETS.music = () => `<div class="wg wide wg-music" aria-label="Music">
     <button data-music="prev" aria-label="Previous">${ICO.prev}</button><button class="pp" data-music="pp" aria-label="Play">${ICO.play}</button><button data-music="next" aria-label="Next">${ICO.next}</button></div>
 </div>`;
 function drawMusic(){
-  const [title, artist, dur] = MUSIC.tracks[mState.i], d = secs(dur);
+  const [title, artist, dur] = MUSIC.tracks[mState.i], d = mState.dur || secs(dur), t = Math.min(mState.t, d);
   document.querySelectorAll(".wg-music").forEach(w => {
     w.classList.toggle("playing", mState.playing);
     w.querySelector(".mt").textContent = title;
     w.querySelector(".ma").textContent = artist;
-    w.querySelector(".mc").textContent = fmt(mState.t);
-    w.querySelector(".md2").textContent = "-" + fmt(d - mState.t);
-    w.querySelector(".mb").style.width = (mState.t / d * 100) + "%";
+    w.querySelector(".ms").textContent = mState.playing ? "now playing" : (mState.t > 0 ? "paused" : "tap play");
+    w.querySelector(".mc").textContent = fmt(t);
+    w.querySelector(".md2").textContent = "-" + fmt(d - t);
+    w.querySelector(".mb").style.width = (t / d * 100) + "%";
     const pp = w.querySelector(".pp"); pp.innerHTML = mState.playing ? ICO.pause : ICO.play; pp.setAttribute("aria-label", mState.playing ? "Pause" : "Play");
   });
 }
