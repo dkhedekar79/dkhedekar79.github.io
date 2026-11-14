@@ -448,7 +448,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 
 /* music widget */
 .wg-music{padding:12px 14px;display:grid;grid-template-columns:62px minmax(0,1fr);gap:4px 12px;align-items:center;background:var(--lg-fill)}
-.wg-music .art{grid-row:span 2;width:62px;height:62px;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;border:0;padding:0;
+.wg-music .art{grid-row:span 2;width:62px;height:62px;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;border:0;padding:0;background-size:cover!important;background-position:center!important;
   background:radial-gradient(circle at 30% 25%,#3b3b3b,#0b0b0b 70%);box-shadow:0 4px 12px rgba(0,0,0,.25);display:grid;place-items:center;color:#f5d27a;font:800 11px/1 var(--font-display);letter-spacing:.04em;text-align:center}
 .wg-music .art small{display:block;font:600 7px/1 var(--font);color:#fff;opacity:.75;margin-top:3px;letter-spacing:.08em}
 .wg-music .art i{position:absolute;right:5px;bottom:5px;width:14px;height:14px;border-radius:50%;background:#1ed760;display:grid;place-items:center}
@@ -1581,10 +1581,21 @@ const MUSIC = {
   name: "💸#1 Larping playlist🥩",
   url: "https://open.spotify.com/playlist/3PZRBDexf8kX3kQSawlK6e",
   embed: "https://open.spotify.com/embed/playlist/3PZRBDexf8kX3kQSawlK6e?utm_source=generator",
+  cover: "img/larp-cover.jpg",
   tracks: [
-    ["Blue Bands","Weiland","2:39"],["Queen St","twentythree","2:08"],["VYZEE","sweetiele","3:07"],
-    ["Stay Schemin","Rick Ross, French Montana, Drake","4:27"],["MMM MAYBACH MUSIC","Soothewave","3:26"],
-    ["Just The Way You Are","Milky, Mall Grab","2:39"],["Fever - Solo","fakemink archive","1:31"],["the kill","Lex Amarni","1:20"]
+    ["Blue Bands","Weiland","2:39","2wl8U2jlhgrr6VgONXOKyA"],
+    ["Queen St","twentythree","2:08","6o86CKQQc85ql8pMHrvJpo"],
+    ["VYZEE","sweetiele","3:07","73oGaQ8vzJMHDOReoMITNd"],
+    ["Not Again","prodbyCyn","2:13","5ENvViyjBpQDJ0i3AuvWEI"],
+    ["Stay Schemin","Rick Ross, French Montana, Drake","4:27","0nq6sfr8z1R5KJ4XUk396e"],
+    ["Just The Way You Are","Milky, Mall Grab","2:39","1LepWHpwtahzEQL0vNjpEt"],
+    ["Fever - Solo","fakemink archive","1:31","0FdLKxYR85N2BBxnuxaVbd"],
+    ["SWAG LIKE ITS 2014","SKULLFACE","1:44","3QmGMdPJuu6vABZsmeNoUG"],
+    ["the kill 2","Lex Amarni, 2muchmotion","2:01","7MZyREIMPkgc7v5vzCGw87"],
+    ["the kill","Lex Amarni","1:20","0SFCVW3o0hwiR8Igq8M0uH"],
+    ["VYZEE - Up, Up, Up - Slowed","sweetiele, mikeeysmind","4:05","2gnqPsxabPgib8SlUKqdgy"],
+    ["Queen St - Instrumental Slowed","xaviorthemachine, Dev1lHawk","2:31","3S8guu7n2C5uvYDFEffaYL"],
+    ["worry - ultra slowed","LONOWN, riserayss","4:15","18j6GCxt5aFKbYqdvksL7N"]
   ]
 };
 const mState = { i: 0, t: 34, playing: true };
@@ -1597,7 +1608,7 @@ const ICO = {
   next:'<svg viewBox="0 0 16 16"><rect x="12" y="3" width="2" height="10" rx="1"/><path d="M2 3v10l8.5-5z"/></svg>'
 };
 WIDGETS.music = () => `<div class="wg wide wg-music playing" aria-label="Music">
-  <button class="art" data-music="open" aria-label="Open the playlist">#1<br>LARP<small>PLAYLIST</small><i><svg viewBox="0 0 16 16" fill="#000"><path d="M3 6c3.5-1.2 7-1 10 .8M3.6 8.5c3-.9 5.8-.7 8.3.7M4.2 10.9c2.4-.6 4.6-.5 6.6.6" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></i></button>
+  <button class="art" data-music="open" aria-label="Open the playlist" style="background-image:url(${MUSIC.cover})"><i><svg viewBox="0 0 16 16" fill="#000"><path d="M3 6c3.5-1.2 7-1 10 .8M3.6 8.5c3-.9 5.8-.7 8.3.7M4.2 10.9c2.4-.6 4.6-.5 6.6.6" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></i></button>
   <button class="meta" data-music="open"><em><span class="eq"><i></i><i></i><i></i></span>now playing</em><b class="mt"></b><span class="ma"></span></button>
   <div class="ctl"><span class="t mc">0:00</span><span class="bar"><i class="mb"></i></span><span class="t md2"></span>
     <button data-music="prev" aria-label="Previous">${ICO.prev}</button><button class="pp" data-music="pp" aria-label="Pause">${ICO.pause}</button><button data-music="next" aria-label="Next">${ICO.next}</button></div>
