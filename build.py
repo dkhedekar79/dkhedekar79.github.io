@@ -261,6 +261,10 @@ def page(title, desc, path, image, ld, body, kind="profile"):
 
 # ---------- build ----------
 def write(rel, text):
+    # cache-bust the wallpaper so browsers and the Pages CDN pick up a changed image
+    import hashlib
+    ver = hashlib.md5((OUT / "wallpaper.webp").read_bytes()).hexdigest()[:8]
+    text = text.replace('wallpaper.webp"', f'wallpaper.webp?v={ver}"')
     p = OUT / rel
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(text)
