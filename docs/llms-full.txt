@@ -1,0 +1,262 @@
+# Daiwik Khedekar: full profile
+
+Daiwik Khedekar is a 16-year-old founder from the UK and the CEO of Pythe, an AI cofounder with a team of AI agents that research, write, build and ship a startup's work. He started his first company, the clothing brand Krzna LDN, at 13, worked as a graphic designer for companies at 14, and has also built Black Box, Trackviso and Creddr.
+
+## FAQ
+
+### Who is Daiwik Khedekar?
+Daiwik Khedekar is a 16-year-old founder from the UK and the CEO of Pythe, an AI cofounder with a team of AI agents that research, write, build and ship a startup's work. He started his first company, the clothing brand Krzna LDN, at 13, worked as a graphic designer for companies at 14, and has also built Black Box, Trackviso and Creddr.
+
+### What is Pythe?
+Pythe is an AI cofounder with a team of AI agents. You describe what you're building, Pythe writes up the company, researches the market and builds a ranked, stage-aware roadmap. Pytheus, the AI cofounder, hands tasks to six agents (researcher, writer, engineer, analyst, outreach and operator), each on its own cloud computer, and nothing goes live without the founder's approval. Daiwik Khedekar co-founded Pythe with Abhiram Kakarla and is its CEO.
+
+### How old is Daiwik Khedekar?
+Daiwik Khedekar is 16.
+
+### What has Daiwik Khedekar built?
+Pythe (an AI cofounder), Black Box (tamper-evident audit logs for AI agents), Trackviso (a gamified study tracker), Creddr (finance careers from zero) and Krzna LDN, a clothing brand he started at 13 that made five-figure revenue.
+
+### What is Daiwik Khedekar good at?
+Design (he was a graphic designer for companies at 14 and makes motion graphics and websites), growth and outreach, and building with AI tools, with more than 1,000 hours of building experience.
+
+### Where does Daiwik Khedekar want to study?
+He is aiming for Economics & Management at the University of Oxford.
+
+### How do I contact Daiwik Khedekar?
+Email daiwik@pythe.app, or message him on LinkedIn (daiwik-khedekar), X (@daiwikbuilds) or Instagram (@dwk.z).
+
+---
+URL: https://dkhedekar79.github.io/about/
+
+# about me
+
+![Daiwik Khedekar](/img/me.jpg)
+
+im daiwik. im 16. im the ceo of pythe
+
+i started my first company at 13. a clothing brand. it made five figures and i thought i had cracked business forever
+
+i hadnt
+
+but i was hooked
+
+at 14 i was doing graphic design for companies
+
+since then
+
+creddr, trackviso, black box, and now pythe with abhi
+
+1,000+ hours vibecoding
+
+## what im actually like
+i dont really switch off. i just switch what im working on
+
+i made my first sale at 13 and havent stopped since
+
+i take latin and run an ai company. nobody has managed to explain that combo to me either
+
+if youre building something, i want to hear about it. the real version, not the pitch
+
+give me a problem and a deadline and ill be fine
+
+## when im not building
+county cricket. nine years of football. rugby at school. three years of karate
+
+i play guitar
+
+i won my school's public speaking award and got lamda grade 6 with distinction. so yes i will talk your ear off
+
+## the plan
+scale pythe to 10k mrr
+
+work at a yc startup
+
+economics & management at oxford
+
+then do it all again but bigger
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/contact/
+
+# contact
+- **email**: `daiwik@pythe.app`
+- **linkedin**: [daiwik-khedekar](https://www.linkedin.com/in/daiwik-khedekar)
+- **x**: [@daiwikbuilds](https://x.com/daiwikbuilds)
+- **instagram**: [@dwk.z](https://www.instagram.com/dwk.z)
+- **github**: [dkhedekar79](https://github.com/dkhedekar79)
+- **pythe**: [pythe.app](https://www.pythe.app)
+
+cold emails welcome. i send enough of them
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/now/
+
+# now
+
+- scaling pythe to 10k mrr
+- sending way too many cold emails
+- trying to make instagram happen ([@dwk.z](https://www.instagram.com/dwk.z))
+- prepping for oxford e&m
+
+## next
+- work at a yc startup
+- then do it all again but bigger
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/projects/black-box/
+
+# black box
+the flight recorder for ai agents · [tryblackbox.dev](https://tryblackbox.dev)
+
+![Black Box](/img/blackbox.jpg)
+
+when an ai agent goes wrong, can you prove what it actually did?
+
+usually no
+
+the logs are scattered everywhere
+
+the agent's own trace is literally the thing under review
+
+and anyone with access can quietly edit the record
+
+## so black box
+- sits at a gateway outside the agent
+- records every model call and tool call
+- seals every entry in a sha-256 hash chain
+- change one entry and the whole chain breaks
+- anyone can verify the log offline
+
+built for teams shipping agents, and the insurers covering them
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/projects/creddr/
+
+# creddr
+[creddr.uk](https://creddr.uk)
+
+![Creddr](/img/creddr.webp)
+
+**jumpstart your finance career from zero**
+
+for people with zero finance background who want a first finance role
+
+starting with the hardest one to break into: private equity
+
+open beta, waitlist open
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/projects/krzna-ldn/
+
+# krzna ldn
+the clothing brand · started at 13
+
+![Krzna logo](/img/krzna.webp)
+
+my first company
+
+i was 13
+
+hand drew the logo myself
+
+it made five figures and i genuinely thought i had cracked business forever
+
+i had not
+
+but it taught me the thing i still believe now: the product is half of it, selling it is the other half
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/projects/pythe/
+
+# pythe
+ceo · co-founded with abhi · [pythe.app](https://www.pythe.app)
+
+![Pythe dashboard](/img/pythe-hero.webp)
+
+**your ai cofounder with a team of ai agents to build anything**
+
+me and abhi came into startups through vibecoding like loads of people
+
+building was never the hard part. knowing what to do next was
+
+so we built the thing we needed
+
+## how it works
+1. tell pythe what youre building. a link, a repo, a few notes, whatever
+2. it writes up your company and researches the market
+3. you get a ranked, stage-aware roadmap
+4. pytheus (the ai cofounder) hands the tasks to six agents: researcher, writer, engineer, analyst, outreach and operator. each one gets its own cloud computer
+5. nothing leaves pythe without your yes
+
+## plugs into
+github, slack, gmail, hubspot, notion, stripe, posthog. and claude, claude code, cursor, codex and chatgpt
+
+## pricing
+free, base at £29/mo, premium at £79/mo. 3 day free trial
+
+we also wrote a 60 page founder's growth playbook and gave it away for free. no email, no gate
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/projects/trackviso/
+
+# trackviso
+gamified study tracker · [trackviso.vercel.app](https://trackviso.vercel.app)
+
+![Trackviso](/img/trackviso.webp)
+
+revision but it feels like a game
+
+- tracks every minute you study
+- analytics so you can see where the time actually goes
+- an ai study tutor
+- xp for showing up
+
+-dk
+
+---
+URL: https://dkhedekar79.github.io/skills/
+
+# skills
+
+## design
+graphic designer for companies at 14
+
+- brand and graphic design
+- motion graphics
+- websites. including this one
+
+## growth
+building the thing is half of it. getting it in front of people is the other half
+
+- outreach. i will message anyone
+- finding the right people and getting them on a call
+- writing content people actually read
+- turning strangers into users
+
+## building with ai
+1,000+ hours
+
+claude, claude code, cursor, codex, chatgpt. everything here got shipped that way
+
+## cold emails
+732 in one week
+
+- be yourself. dont put on a pretentious cover
+- have a clear ask
+- showboat a bit. how impressive you sound matters
+
+-dk
