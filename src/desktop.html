@@ -250,6 +250,7 @@ body.mobile #desktop,body.mobile #menubar,body.mobile #dockwrap,body.mobile #win
 .fitem.sel{background:var(--select)}
 .fitem .art{height:58px;display:grid;place-items:center}
 .fitem span{overflow-wrap:anywhere}
+.fitem .fthumb{display:block;width:46px;height:58px;border-radius:4px;background:#15171c center/cover no-repeat;box-shadow:0 0 0 .5px rgba(0,0,0,.2),0 3px 8px rgba(0,0,0,.2)}
 .fpath{height:26px;flex:none;border-top:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11px;color:var(--ink-3);background:#f6f7f9}
 .fnav{display:flex;gap:2px}
 .fnav button{width:28px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--ink-2)}
@@ -1382,7 +1383,8 @@ function navTo(W, key, noHist){
   const grid = $(".fgrid",W.body); grid.innerHTML = "";
   const items = folderContents(key);
   items.forEach((it,i) => {
-    const b = el("button","fitem", `<div class="art">${it.kind==="folder"?SVG.folder(58):SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
+    const thumb = it.kind === "file" && firstImg(it.file);
+    const b = el("button","fitem", `<div class="art">${it.kind==="folder"?SVG.folder(58):thumb?`<span class="fthumb" style="background-image:url(${thumb})"></span>`:SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
     b.onclick = () => { grid.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
     b.ondblclick = () => it.kind==="folder" ? navTo(W, it.key) : openDoc(it.file, b);
     b.onkeydown = e => { if (e.key==="Enter") b.ondblclick(); };
