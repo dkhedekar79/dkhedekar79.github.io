@@ -477,14 +477,14 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 
 /* music widget */
 .wg-music{padding:12px 14px;display:grid;grid-template-columns:62px minmax(0,1fr);gap:4px 12px;align-items:center;background:var(--lg-fill)}
-.wg-music .art{grid-row:span 2;width:62px;height:62px;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;border:0;padding:0;
+.wg-music .art{grid-row:span 2;width:62px;height:62px;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;border:0;padding:0;background-size:cover!important;background-position:center!important;
   background:radial-gradient(circle at 30% 25%,#3b3b3b,#0b0b0b 70%);box-shadow:0 4px 12px rgba(0,0,0,.25);display:grid;place-items:center;color:#f5d27a;font:800 11px/1 var(--font-display);letter-spacing:.04em;text-align:center}
 .wg-music .art small{display:block;font:600 7px/1 var(--font);color:#fff;opacity:.75;margin-top:3px;letter-spacing:.08em}
 .wg-music .art i{position:absolute;right:5px;bottom:5px;width:14px;height:14px;border-radius:50%;background:#1ed760;display:grid;place-items:center}
 .wg-music .art i svg{width:9px;height:9px}
 .wg-music .meta{min-width:0;cursor:pointer;background:none;border:0;padding:0;text-align:left;color:inherit}
 .wg-music .meta b{display:block;font:650 12.5px/1.25 var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wg-music .meta span{display:block;font-size:11px;color:var(--lg-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wg-music .meta>span{display:block;font-size:11px;color:var(--lg-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wg-music .meta em{font-style:normal;font-size:9.5px;font-weight:600;color:var(--lg-ink-2);text-transform:uppercase;letter-spacing:.05em}
 .wg-music .ctl{display:flex;align-items:center;gap:8px;min-width:0}
 .wg-music .bar{flex:1;height:4px;border-radius:2px;background:rgba(15,27,45,.15);overflow:hidden}
@@ -499,6 +499,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .eq i{width:2px;height:3px;background:#1ed760;border-radius:1px}
 .eq i:nth-child(2){animation-delay:.3s!important}.eq i:nth-child(3){animation-delay:.6s!important}
 @keyframes eq{to{height:9px}}
+.spot-hidden{position:fixed;left:0;bottom:0;width:300px;height:80px;opacity:0;pointer-events:none;z-index:-1;overflow:hidden}
 .spot-embed{flex:1;display:flex;flex-direction:column;background:#121212;color:#fff}
 .spot-embed iframe{flex:1;width:100%;border:0;min-height:352px}
 .spot-embed a{display:block;padding:10px 14px;font-size:12px;color:#1ed760;text-decoration:none;border-top:1px solid #2a2a2a}
@@ -1613,13 +1614,24 @@ const MUSIC = {
   name: "💸#1 Larping playlist🥩",
   url: "https://open.spotify.com/playlist/3PZRBDexf8kX3kQSawlK6e",
   embed: "https://open.spotify.com/embed/playlist/3PZRBDexf8kX3kQSawlK6e?utm_source=generator",
+  cover: "img/larp-cover.jpg",
   tracks: [
-    ["Blue Bands","Weiland","2:39"],["Queen St","twentythree","2:08"],["VYZEE","sweetiele","3:07"],
-    ["Stay Schemin","Rick Ross, French Montana, Drake","4:27"],["MMM MAYBACH MUSIC","Soothewave","3:26"],
-    ["Just The Way You Are","Milky, Mall Grab","2:39"],["Fever - Solo","fakemink archive","1:31"],["the kill","Lex Amarni","1:20"]
+    ["Blue Bands","Weiland","2:39","2wl8U2jlhgrr6VgONXOKyA"],
+    ["Queen St","twentythree","2:08","6o86CKQQc85ql8pMHrvJpo"],
+    ["VYZEE","sweetiele","3:07","73oGaQ8vzJMHDOReoMITNd"],
+    ["Not Again","prodbyCyn","2:13","5ENvViyjBpQDJ0i3AuvWEI"],
+    ["Stay Schemin","Rick Ross, French Montana, Drake","4:27","0nq6sfr8z1R5KJ4XUk396e"],
+    ["Just The Way You Are","Milky, Mall Grab","2:39","1LepWHpwtahzEQL0vNjpEt"],
+    ["Fever - Solo","fakemink archive","1:31","0FdLKxYR85N2BBxnuxaVbd"],
+    ["SWAG LIKE ITS 2014","SKULLFACE","1:44","3QmGMdPJuu6vABZsmeNoUG"],
+    ["the kill 2","Lex Amarni, 2muchmotion","2:01","7MZyREIMPkgc7v5vzCGw87"],
+    ["the kill","Lex Amarni","1:20","0SFCVW3o0hwiR8Igq8M0uH"],
+    ["VYZEE - Up, Up, Up - Slowed","sweetiele, mikeeysmind","4:05","2gnqPsxabPgib8SlUKqdgy"],
+    ["Queen St - Instrumental Slowed","xaviorthemachine, Dev1lHawk","2:31","3S8guu7n2C5uvYDFEffaYL"],
+    ["worry - ultra slowed","LONOWN, riserayss","4:15","18j6GCxt5aFKbYqdvksL7N"]
   ]
 };
-const mState = { i: 0, t: 34, playing: true };
+const mState = { i: 0, t: 0, dur: 0, playing: false, wasPlaying: false, lastPos: 0 };
 const secs = d => { const [m,s] = d.split(":").map(Number); return m*60+s; };
 const fmt = n => `${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,"0")}`;
 const ICO = {
@@ -1628,28 +1640,75 @@ const ICO = {
   prev:'<svg viewBox="0 0 16 16"><rect x="2" y="3" width="2" height="10" rx="1"/><path d="M14 3v10L5.5 8z"/></svg>',
   next:'<svg viewBox="0 0 16 16"><rect x="12" y="3" width="2" height="10" rx="1"/><path d="M2 3v10l8.5-5z"/></svg>'
 };
-WIDGETS.music = () => `<div class="wg wide wg-music playing" aria-label="Music">
-  <button class="art" data-music="open" aria-label="Open the playlist">#1<br>LARP<small>PLAYLIST</small><i><svg viewBox="0 0 16 16" fill="#000"><path d="M3 6c3.5-1.2 7-1 10 .8M3.6 8.5c3-.9 5.8-.7 8.3.7M4.2 10.9c2.4-.6 4.6-.5 6.6.6" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></i></button>
-  <button class="meta" data-music="open"><em><span class="eq"><i></i><i></i><i></i></span>now playing</em><b class="mt"></b><span class="ma"></span></button>
+WIDGETS.music = () => `<div class="wg wide wg-music" aria-label="Music">
+  <button class="art" data-music="open" aria-label="Open the playlist" style="background-image:url(${MUSIC.cover})"><i><svg viewBox="0 0 16 16" fill="#000"><path d="M3 6c3.5-1.2 7-1 10 .8M3.6 8.5c3-.9 5.8-.7 8.3.7M4.2 10.9c2.4-.6 4.6-.5 6.6.6" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></i></button>
+  <button class="meta" data-music="open"><em><span class="eq"><i></i><i></i><i></i></span><span class="ms">tap play</span></em><b class="mt"></b><span class="ma"></span></button>
   <div class="ctl"><span class="t mc">0:00</span><span class="bar"><i class="mb"></i></span><span class="t md2"></span>
-    <button data-music="prev" aria-label="Previous">${ICO.prev}</button><button class="pp" data-music="pp" aria-label="Pause">${ICO.pause}</button><button data-music="next" aria-label="Next">${ICO.next}</button></div>
+    <button data-music="prev" aria-label="Previous">${ICO.prev}</button><button class="pp" data-music="pp" aria-label="Play">${ICO.play}</button><button data-music="next" aria-label="Next">${ICO.next}</button></div>
 </div>`;
 function drawMusic(){
-  const [title, artist, dur] = MUSIC.tracks[mState.i], d = secs(dur);
+  const [title, artist, dur] = MUSIC.tracks[mState.i], d = mState.dur || secs(dur), t = Math.min(mState.t, d);
   document.querySelectorAll(".wg-music").forEach(w => {
     w.classList.toggle("playing", mState.playing);
     w.querySelector(".mt").textContent = title;
     w.querySelector(".ma").textContent = artist;
-    w.querySelector(".mc").textContent = fmt(mState.t);
-    w.querySelector(".md2").textContent = "-" + fmt(d - mState.t);
-    w.querySelector(".mb").style.width = (mState.t / d * 100) + "%";
+    w.querySelector(".ms").textContent = mState.playing ? "now playing" : (mState.t > 0 ? "paused" : "tap play");
+    w.querySelector(".mc").textContent = fmt(t);
+    w.querySelector(".md2").textContent = "-" + fmt(d - t);
+    w.querySelector(".mb").style.width = (t / d * 100) + "%";
     const pp = w.querySelector(".pp"); pp.innerHTML = mState.playing ? ICO.pause : ICO.play; pp.setAttribute("aria-label", mState.playing ? "Pause" : "Play");
   });
 }
-function skip(n){ mState.i = (mState.i + n + MUSIC.tracks.length) % MUSIC.tracks.length; mState.t = 0; drawMusic(); }
-setInterval(() => { if (!mState.playing) return; mState.t++; if (mState.t >= secs(MUSIC.tracks[mState.i][2])) skip(1); else drawMusic(); }, 1000);
+function skip(n){
+  const i = (mState.i + n + MUSIC.tracks.length) % MUSIC.tracks.length;
+  if (mState.playing || mState.wasPlaying) return playTrack(i);
+  mState.i = i; mState.t = 0; mState.dur = 0; drawMusic();
+}
+/* real playback: Spotify's embed player, driven through its iFrame API */
+let spot = null, spotLoaded = -1;
+window.onSpotifyIframeApiReady = IFrameAPI => {
+  const mount = el("div","spot-hidden"); mount.setAttribute("aria-hidden","true");
+  const slot = el("div"); mount.appendChild(slot); document.body.appendChild(mount);
+  IFrameAPI.createController(slot, { uri: "spotify:track:" + MUSIC.tracks[mState.i][3], width: 300, height: 80 }, c => {
+    spot = c; spotLoaded = mState.i;
+    c.addListener("playback_update", e => onSpot(e.data));
+    drawMusic();
+  });
+};
+(() => { const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc); })();
+function onSpot(d){
+  if (!d) return;
+  const want = "spotify:track:" + MUSIC.tracks[mState.i][3];
+  if (d.playingURI && d.playingURI !== want) return; // late update from the previous track
+  mState.uri = d.playingURI || want;
+  const ended = !mState.advancing && mState.wasPlaying && d.duration > 0 &&
+    (d.position >= d.duration - 250 || (d.isPaused && d.position === 0 && mState.lastPos >= d.duration - 1500));
+  mState.playing = !d.isPaused;
+  mState.wasPlaying = mState.playing;
+  mState.t = d.position / 1000;
+  mState.dur = d.duration / 1000;
+  mState.lastPos = d.position;
+  if (ended){ mState.wasPlaying = true; mState.advancing = true; setTimeout(() => { mState.advancing = false; }, 2500); return playTrack((mState.i + 1) % MUSIC.tracks.length); }
+  drawMusic();
+}
+function playTrack(i){
+  mState.i = i; mState.t = 0; mState.dur = 0; mState.lastPos = 0;
+  if (!spot){ drawMusic(); return; }
+  const uri = "spotify:track:" + MUSIC.tracks[i][3];
+  if (spotLoaded !== i){ spot.loadUri(uri); spotLoaded = i; }
+  // a freshly loaded embed can ignore the first play(), so keep asking until it reports this track playing
+  let tries = 0; clearInterval(mState.retry);
+  mState.retry = setInterval(() => {
+    if ((mState.playing && mState.uri === uri) || ++tries > 10) return clearInterval(mState.retry);
+    spot.play();
+  }, 600);
+  spot.play();
+  drawMusic();
+}
+
 function openMusic(origin){
   if (isMobile()){ const a = el("a"); a.href = MUSIC.url; a.target = "_blank"; a.rel = "noopener"; a.click(); return; }
+  if (spot && mState.playing) spot.pause();
   const W = createWin({ id:"spotify", title:MUSIC.name, app:"Spotify", w:420, h:480, origin });
   if (W.built) return; W.built = true;
   W.body.innerHTML = `<div class="spot-embed"><iframe src="${MUSIC.embed}" title="Spotify playlist" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="${MUSIC.url}" target="_blank" rel="noopener">Open in Spotify ↗</a></div>`;
@@ -1657,9 +1716,9 @@ function openMusic(origin){
 document.addEventListener("click", ev => {
   const b = ev.target.closest("[data-music]"); if (!b) return;
   const a = b.dataset.music;
-  if (a === "pp"){ mState.playing = !mState.playing; drawMusic(); }
+  if (a === "pp"){ if (!spot) return openMusic(b.closest(".wg")); spotLoaded !== mState.i ? playTrack(mState.i) : spot.togglePlay(); }
   else if (a === "next") skip(1);
-  else if (a === "prev") mState.t > 3 ? (mState.t = 0, drawMusic()) : skip(-1);
+  else if (a === "prev"){ if (spot && mState.t > 3) spot.seek(0); else skip(-1); }
   else openMusic(b.closest(".wg"));
 });
 
