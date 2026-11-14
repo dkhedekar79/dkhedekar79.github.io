@@ -1627,7 +1627,11 @@ function drawMusic(){
     const pp = w.querySelector(".pp"); pp.innerHTML = mState.playing ? ICO.pause : ICO.play; pp.setAttribute("aria-label", mState.playing ? "Pause" : "Play");
   });
 }
-function skip(n){ mState.i = (mState.i + n + MUSIC.tracks.length) % MUSIC.tracks.length; mState.t = 0; drawMusic(); }
+function skip(n){
+  const i = (mState.i + n + MUSIC.tracks.length) % MUSIC.tracks.length;
+  if (mState.playing || mState.wasPlaying) return playTrack(i);
+  mState.i = i; mState.t = 0; mState.dur = 0; drawMusic();
+}
 /* real playback: Spotify's embed player, driven through its iFrame API */
 let spot = null, spotLoaded = -1;
 window.onSpotifyIframeApiReady = IFrameAPI => {
@@ -1660,7 +1664,7 @@ document.addEventListener("click", ev => {
   const a = b.dataset.music;
   if (a === "pp"){ if (!spot) return openMusic(b.closest(".wg")); spotLoaded !== mState.i ? playTrack(mState.i) : spot.togglePlay(); }
   else if (a === "next") skip(1);
-  else if (a === "prev") mState.t > 3 ? (mState.t = 0, drawMusic()) : skip(-1);
+  else if (a === "prev"){ if (spot && mState.t > 3) spot.seek(0); else skip(-1); }
   else openMusic(b.closest(".wg"));
 });
 
