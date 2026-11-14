@@ -1665,6 +1665,7 @@ function playTrack(i){
 
 function openMusic(origin){
   if (isMobile()){ const a = el("a"); a.href = MUSIC.url; a.target = "_blank"; a.rel = "noopener"; a.click(); return; }
+  if (spot && mState.playing) spot.pause();
   const W = createWin({ id:"spotify", title:MUSIC.name, app:"Spotify", w:420, h:480, origin });
   if (W.built) return; W.built = true;
   W.body.innerHTML = `<div class="spot-embed"><iframe src="${MUSIC.embed}" title="Spotify playlist" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="${MUSIC.url}" target="_blank" rel="noopener">Open in Spotify ↗</a></div>`;
