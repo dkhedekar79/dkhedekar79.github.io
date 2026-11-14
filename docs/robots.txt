@@ -49,4 +49,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://dkhedekar79.github.io/sitemap.xml
+Sitemap: https://daiwikkhedekar.me/sitemap.xml
