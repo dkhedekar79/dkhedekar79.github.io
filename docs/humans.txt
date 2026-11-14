@@ -1,6 +1,6 @@
 /* TEAM */
 Founder: Daiwik Khedekar
-Site: https://dkhedekar79.github.io
+Site: https://daiwikkhedekar.me
 X: @daiwikbuilds
 Email: daiwik@pythe.app
 
