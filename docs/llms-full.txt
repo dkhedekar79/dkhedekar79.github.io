@@ -26,7 +26,7 @@ He is aiming for Economics & Management at the University of Oxford.
 Email daiwik@pythe.app, or message him on LinkedIn (daiwik-khedekar), X (@daiwikbuilds) or Instagram (@dwk.z).
 
 ---
-URL: https://dkhedekar79.github.io/about/
+URL: https://daiwikkhedekar.me/about/
 
 # about me
 
@@ -78,7 +78,7 @@ then do it all again but bigger
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/contact/
+URL: https://daiwikkhedekar.me/contact/
 
 # contact
 - **email**: `daiwik@pythe.app`
@@ -93,7 +93,7 @@ cold emails welcome. i send enough of them
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/now/
+URL: https://daiwikkhedekar.me/now/
 
 # now
 
@@ -109,7 +109,7 @@ URL: https://dkhedekar79.github.io/now/
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/projects/black-box/
+URL: https://daiwikkhedekar.me/projects/black-box/
 
 # black box
 the flight recorder for ai agents · [tryblackbox.dev](https://tryblackbox.dev)
@@ -138,7 +138,7 @@ built for teams shipping agents, and the insurers covering them
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/projects/creddr/
+URL: https://daiwikkhedekar.me/projects/creddr/
 
 # creddr
 [creddr.uk](https://creddr.uk)
@@ -156,7 +156,7 @@ open beta, waitlist open
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/projects/krzna-ldn/
+URL: https://daiwikkhedekar.me/projects/krzna-ldn/
 
 # krzna ldn
 the clothing brand · started at 13
@@ -178,7 +178,7 @@ but it taught me the thing i still believe now: the product is half of it, selli
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/projects/pythe/
+URL: https://daiwikkhedekar.me/projects/pythe/
 
 # pythe
 ceo · co-founded with abhi · [pythe.app](https://www.pythe.app)
@@ -211,7 +211,7 @@ we also wrote a 60 page founder's growth playbook and gave it away for free. no 
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/projects/trackviso/
+URL: https://daiwikkhedekar.me/projects/trackviso/
 
 # trackviso
 gamified study tracker · [trackviso.vercel.app](https://trackviso.vercel.app)
@@ -228,7 +228,7 @@ revision but it feels like a game
 -dk
 
 ---
-URL: https://dkhedekar79.github.io/skills/
+URL: https://daiwikkhedekar.me/skills/
 
 # skills
 
