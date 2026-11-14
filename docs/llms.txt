@@ -1,0 +1,26 @@
+# Daiwik Khedekar
+
+> Daiwik Khedekar is a 16-year-old founder from the UK and the CEO of Pythe, an AI cofounder with a team of AI agents that research, write, build and ship a startup's work. He started his first company, the clothing brand Krzna LDN, at 13, worked as a graphic designer for companies at 14, and has also built Black Box, Trackviso and Creddr.
+
+Daiwik Khedekar (also written as Daiwik, or dk) is the CEO and co-founder of Pythe (https://www.pythe.app), which he co-founded with Abhiram Kakarla.
+
+## Pages
+
+- [About Daiwik Khedekar](https://dkhedekar79.github.io/about/): Daiwik Khedekar is a 16-year-old UK founder and the CEO of Pythe, an AI cofounder with a team of AI agents. He started his first company, Krzna LDN, at 13.
+- [Contact Daiwik Khedekar](https://dkhedekar79.github.io/contact/): How to contact Daiwik Khedekar - email daiwik@pythe.app, LinkedIn, X @daiwikbuilds, Instagram @dwk.z and GitHub dkhedekar79.
+- [Now, what Daiwik Khedekar is working on](https://dkhedekar79.github.io/now/): What Daiwik Khedekar is focused on right now - scaling Pythe to 10k MRR, outreach, and applying for Economics & Management at Oxford.
+- [Black Box, the flight recorder for AI agents](https://dkhedekar79.github.io/projects/black-box/): Black Box records every model and tool call an AI agent makes in a tamper-evident SHA-256 hash chain that anyone can verify offline. A project by Daiwik Khedekar.
+- [Creddr, finance careers from zero](https://dkhedekar79.github.io/projects/creddr/): Creddr helps people with no finance background land a first finance role, starting with private equity. Built by Daiwik Khedekar.
+- [Krzna LDN, the clothing brand Daiwik Khedekar started at 13](https://dkhedekar79.github.io/projects/krzna-ldn/): Krzna LDN is the clothing brand Daiwik Khedekar started at 13. It made five-figure revenue.
+- [Pythe, the AI cofounder by Daiwik Khedekar](https://dkhedekar79.github.io/projects/pythe/): Pythe is an AI cofounder with a team of AI agents that research, write, build and ship a startup's work. Co-founded by Daiwik Khedekar (CEO) and Abhiram Kakarla.
+- [Trackviso, a gamified study tracker](https://dkhedekar79.github.io/projects/trackviso/): Trackviso is a gamified study tracker built by Daiwik Khedekar, with study analytics, an AI study tutor and XP for revising.
+- [Skills, Daiwik Khedekar](https://dkhedekar79.github.io/skills/): Daiwik Khedekar's skills - design and motion graphics (graphic designer for companies at 14), growth and outreach, and 1,000+ hours building with AI.
+- [FAQ](https://dkhedekar79.github.io/faq/): common questions about Daiwik Khedekar
+
+## Profiles
+
+- https://www.linkedin.com/in/daiwik-khedekar
+- https://x.com/daiwikbuilds
+- https://www.instagram.com/dwk.z
+- https://github.com/dkhedekar79
+- Email: daiwik@pythe.app
