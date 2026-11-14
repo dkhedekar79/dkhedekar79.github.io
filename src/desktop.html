@@ -1641,6 +1641,13 @@ window.onSpotifyIframeApiReady = IFrameAPI => {
 };
 (() => { const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc); })();
 function onSpot(d){}
+function playTrack(i){
+  mState.i = i; mState.t = 0; mState.dur = 0; mState.lastPos = 0;
+  if (!spot){ drawMusic(); return; }
+  if (spotLoaded !== i){ spot.loadUri("spotify:track:" + MUSIC.tracks[i][3]); spotLoaded = i; setTimeout(() => spot.play(), 400); }
+  else spot.play();
+  drawMusic();
+}
 
 function openMusic(origin){
   if (isMobile()){ const a = el("a"); a.href = MUSIC.url; a.target = "_blank"; a.rel = "noopener"; a.click(); return; }
@@ -1651,7 +1658,7 @@ function openMusic(origin){
 document.addEventListener("click", ev => {
   const b = ev.target.closest("[data-music]"); if (!b) return;
   const a = b.dataset.music;
-  if (a === "pp"){ mState.playing = !mState.playing; drawMusic(); }
+  if (a === "pp"){ if (!spot) return openMusic(b.closest(".wg")); spotLoaded !== mState.i ? playTrack(mState.i) : spot.togglePlay(); }
   else if (a === "next") skip(1);
   else if (a === "prev") mState.t > 3 ? (mState.t = 0, drawMusic()) : skip(-1);
   else openMusic(b.closest(".wg"));
