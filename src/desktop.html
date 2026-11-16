@@ -1528,6 +1528,7 @@ function openTerminal(origin){
   print(`<span class="dim">Last login: ${new Date().toDateString()} on ttys000</span>`);
   print(`Type <span class="dir">help</span> to see what you can do.`);
   const dirKey = name => Object.entries(FOLDERS).find(([k,f]) => k===name.toLowerCase() || f.name.toLowerCase()===name.toLowerCase().replace(/\/$/,""))?.[0];
+  const lsList = files => files.map(f => { const n = isSub(f) ? FOLDERS[f.sub].name : f.name, shown = esc(n.includes(" ") ? `'${n}'` : n); return isSub(f) ? `<span class="dir">${shown}/</span>` : shown; }).join("   ");
   const filesHere = () => cwd==="~" ? DESK_FILES : FOLDERS[dirKey(cwd.slice(2))].files;
   const cmds = {
     help: () => print(`<span class="dir">ls</span> [folder]     list files
@@ -1536,12 +1537,12 @@ function openTerminal(origin){
 <span class="dir">open</span> &lt;name&gt;     open a file, folder or link (pythe, github, linkedin, instagram, x)
 <span class="dir">whoami</span>, <span class="dir">neofetch</span>, <span class="dir">date</span>, <span class="dir">clear</span>, <span class="dir">exit</span>`),
     ls: a => {
-      if (a){ const k = dirKey(a); return k ? print(FOLDERS[k].files.map(f=>esc(f.name.includes(" ")?`'${f.name}'`:f.name)).join("   ")) : print(`ls: ${esc(a)}: No such file or directory`,"err"); }
-      if (cwd === "~") print(Object.values(FOLDERS).map(f=>`<span class="dir">${esc(f.name.includes(" ")?`'${f.name}'`:f.name)}/</span>`).join("   ") + "   " + DESK_FILES.map(f=>f.name).join("   "));
-      else print(filesHere().map(f=>esc(f.name.includes(" ")?`'${f.name}'`:f.name)).join("   "));
+      if (a){ const k = dirKey(a); return k ? print(lsList(FOLDERS[k].files)) : print(`ls: ${esc(a)}: No such file or directory`,"err"); }
+      if (cwd === "~") print(Object.entries(FOLDERS).filter(([k]) => !nested.has(k)).map(([,f]) => f).map(f=>`<span class="dir">${esc(f.name.includes(" ")?`'${f.name}'`:f.name)}/</span>`).join("   ") + "   " + DESK_FILES.map(f=>f.name).join("   "));
+      else print(lsList(filesHere()));
     },
     cd: a => { if (!a || a==="~" || a===".."){ cwd="~"; } else { const k = dirKey(a); if (!k) return print(`cd: no such file or directory: ${esc(a)}`,"err"); cwd = "~/"+FOLDERS[k].name; } pr.textContent = prompt(); },
-    cat: a => { const f = filesHere().find(f=>f.name.toLowerCase()===a?.toLowerCase()); f ? print(esc(mdOf(f).replace(/<[^>]+>/g,""))) : print(`cat: ${esc(a||"")}: No such file or directory`,"err"); },
+    cat: a => { const f = filesHere().filter(f => !isSub(f)).find(f=>f.name.toLowerCase()===a?.toLowerCase()); f ? print(esc(mdOf(f).replace(/<[^>]+>/g,""))) : print(`cat: ${esc(a||"")}: No such file or directory`,"err"); },
     open: a => {
       if (!a) return print("usage: open <name>","err");
       const l = a.toLowerCase();
@@ -1560,7 +1561,7 @@ function openTerminal(origin){
 <span class="pr">      / o o \\      </span>  ----------------
 <span class="pr">     |   ^   |     </span>  <span class="dir">Role</span>: ${esc(PROFILE.title)}
 <span class="pr">      \\ '-' /      </span>  <span class="dir">Building</span>: Pythe, Creddr, Trackviso, ProjectEnlight
-<span class="pr">       '---'       </span>  <span class="dir">Folders</span>: ${Object.keys(FOLDERS).length}   <span class="dir">Notes</span>: ${DESK_FILES.length + Object.values(FOLDERS).reduce((n,f)=>n+f.files.length,0)}
+<span class="pr">       '---'       </span>  <span class="dir">Folders</span>: ${Object.keys(FOLDERS).length}   <span class="dir">Notes</span>: ${DESK_FILES.length + Object.values(FOLDERS).reduce((n,f)=>n+f.files.filter(x => !isSub(x)).length,0)}
                      <span class="dir">Shell</span>: zsh (pretend)`)
   };
   inp.addEventListener("keydown", e => {
