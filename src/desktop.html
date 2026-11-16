@@ -1122,7 +1122,10 @@ const SVG = {
 const $ = (s, r=document) => r.querySelector(s);
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-const mdOf = f => typeof f.md === "function" ? f.md() : f.md;
+const mdOf = f => f.sub ? "" : typeof f.md === "function" ? f.md() : f.md;
+// a folder's "files" can include { name, sub: "<folder key>" } to nest another folder inside it
+const isSub = f => !!f.sub;
+const nested = new Set(Object.values(FOLDERS).flatMap(F => F.files.filter(isSub).map(f => f.sub)));
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function inline(s){
@@ -1251,7 +1254,7 @@ function openBurst(it){
     const row = Math.floor(i / cols), inRow = row === rows-1 ? n - row*cols : cols;
     const col = i - row*cols, rowOffset = (cols - inRow) * (cardW + gapX) / 2;
     const x = bx + rowOffset + col*(cardW + gapX), y = by + row*(cardH + gapY);
-    const s = snippet(f.md);
+    const s = snippet(mdOf(f));
     const c = el("button","bcard");
     c.style.left = x+"px"; c.style.top = y+"px";
     c.style.setProperty("--dx", (cx - (x+cardW/2))+"px");
