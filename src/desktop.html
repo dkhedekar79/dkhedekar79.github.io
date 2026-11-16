@@ -1893,10 +1893,11 @@ function isMobile(){ return MOBILE_Q.matches; }
 const firstImg = f => (mdOf(f).match(/!\[[^\]]*\]\(([^)\s]+)\)/) || [])[1];
 const fileIcon = f => { const im = firstImg(f); return im ? `<span class="mi m-thumb" style="background-image:url(${im})"></span>` : `<span class="mi m-md"><i></i><i></i><i></i><b>MD</b></span>`; };
 const shortName = n => n.replace(/\.md$/,"");
+const foldIcon = k => `<span class="mi m-fold">${FOLDERS[k].files.slice(0,9).map(f=>{ const im = isSub(f) ? firstImg(FOLDERS[f.sub].files[0]) : firstImg(f); return `<i${im?` style="background-image:url(${im})"`:""}></i>`; }).join("")}</span>`;
 function buildMobile(){
   const grid = $("#mGrid");
   const apps = [
-    ...Object.entries(FOLDERS).map(([k,F]) => `<button class="m-app" data-fold="${k}"><span class="mi m-fold">${F.files.slice(0,9).map(f=>{ const im = firstImg(f); return `<i${im?` style="background-image:url(${im})"`:""}></i>`; }).join("")}</span><span>${esc(F.name)}</span></button>`),
+    ...Object.entries(FOLDERS).filter(([k]) => !nested.has(k)).map(([k,F]) => `<button class="m-app" data-fold="${k}">${foldIcon(k)}<span>${esc(F.name)}</span></button>`),
     ...DESK_FILES.map((f,i) => `<button class="m-app" data-desk="${i}">${fileIcon(f)}<span>${esc(shortName(f.name))}</span></button>`),
     `<a class="m-app" href="${PROFILE.links.github}" target="_blank" rel="noopener"><span class="mi">${SVG.github}</span><span>GitHub</span></a>`,
     `<button class="m-app" data-desk="3"><span class="mi">${SVG.mail}</span><span>Contact</span></button>`
@@ -1915,7 +1916,13 @@ function openMFolder(key, from){
   const o = el("div"); o.id = "mfold"; o.setAttribute("role","dialog"); o.setAttribute("aria-label", F.name);
   o.innerHTML = `<h2>${esc(F.name)}</h2><div class="panel"></div>`;
   const panel = $(".panel", o);
-  F.files.forEach(f => { const b = el("button","m-app", `${fileIcon(f)}<span>${esc(shortName(f.name))}</span>`); b.onclick = () => openSheet(f); panel.appendChild(b); });
+  F.files.forEach(f => {
+    const b = isSub(f)
+      ? el("button","m-app", `${foldIcon(f.sub)}<span>${esc(FOLDERS[f.sub].name)}</span>`)
+      : el("button","m-app", `${fileIcon(f)}<span>${esc(shortName(f.name))}</span>`);
+    b.onclick = () => isSub(f) ? openMFolder(f.sub, b.querySelector(".mi")) : openSheet(f);
+    panel.appendChild(b);
+  });
   document.body.appendChild(o);
   const r = from.getBoundingClientRect(), fx = r.left + r.width/2, fy = r.top + r.height/2;
   if (!reduce){
