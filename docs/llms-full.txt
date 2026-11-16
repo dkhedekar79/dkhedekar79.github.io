@@ -143,6 +143,49 @@ sona8
 
 an old acoustic listening machine. four horns lit purple, arranged like the sona8 logo
 
+
+## stays in the sandbox.
+archal · api sandboxes, built for ai agents
+
+![Archal poster: stays in the sandbox](/img/design/archal-stays-in-the-sandbox.jpg)
+
+an actual sandbox. bucket, spade, wooden walls. whatever happens in there stays in there
+
+## litmus test.
+litmus · evals for humans
+
+![Litmus poster: litmus test](/img/design/litmus-litmus-test.jpg)
+
+two real litmus strips, blue turning red. the name is the test
+
+## sunlight, recovered.
+meteoric · drones that clear clouds over solar farms
+
+![Meteoric poster: sunlight, recovered](/img/design/meteoric-sunlight-recovered.jpg)
+
+the moment the sun breaks back through the clouds
+
+## we’ll wait in line.
+veeza · tourist visa applications, handled by ai
+
+![Veeza poster: we'll wait in line](/img/design/veeza-well-wait-in-line.jpg)
+
+an old photo of a queue. one man in blue does the waiting so you dont have to
+
+## quote first.
+covera · ai for insurance agents and brokers
+
+![Covera poster: quote first](/img/design/covera-quote-first.jpg)
+
+a runner breaking the tape. the tape is the only thing in colour
+
+## everything after you sign.
+quivly · the ai workforce for post-sales teams
+
+![Quivly poster: everything after you sign](/img/design/quivly-everything-after-you-sign.jpg)
+
+a signature that turns into a growth line. black ink for the deal, green for everything after
+
 -dk
 
 ---
