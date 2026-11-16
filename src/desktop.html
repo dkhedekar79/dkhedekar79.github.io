@@ -1165,7 +1165,7 @@ function snippet(src){
 
 /* ============ Desktop icons ============ */
 const desktopItems = [
-  ...Object.entries(FOLDERS).map(([key,f]) => ({ kind:"folder", key, name:f.name, tag:f.tag })),
+  ...Object.entries(FOLDERS).filter(([key]) => !nested.has(key)).map(([key,f]) => ({ kind:"folder", key, name:f.name, tag:f.tag })),
   ...DESK_FILES.map(f => ({ kind:"file", file:f, name:f.name }))
 ];
 const iconsEl = $("#icons");
@@ -1434,7 +1434,7 @@ const NAV = [
 function folderContents(key){
   if (key === "desktop") return desktopItems.map(it => it.kind==="folder" ? {kind:"folder",key:it.key,name:it.name} : {kind:"file",file:it.file,name:it.name});
   if (key === "trash") return TRASH.map(f=>({kind:"file",file:f,name:f.name}));
-  return FOLDERS[key].files.map(f=>({kind:"file",file:f,name:f.name}));
+  return FOLDERS[key].files.map(f => isSub(f) ? {kind:"folder",key:f.sub,name:FOLDERS[f.sub].name} : {kind:"file",file:f,name:f.name});
 }
 const labelOf = k => k==="desktop"?"Desktop":k==="trash"?"Trash":FOLDERS[k].name;
 function openFinder(key="desktop", origin){
