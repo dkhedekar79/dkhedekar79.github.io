@@ -92,6 +92,12 @@ a{color:inherit}
 .bcard .page::after{content:attr(data-ext);position:absolute;right:6px;bottom:6px;font:700 7px/1 var(--font);color:#fff;background:#6b7280;border-radius:3px;padding:2px 4px}
 .bcard .page.img{padding:0;background:#15171c center/cover no-repeat}
 .bcard .page.folder::after{background:var(--accent)}
+.bcard .page.sub{background:none;box-shadow:none;padding:0;display:grid;place-items:end center;overflow:visible}
+.bcard .page.sub svg{filter:drop-shadow(0 8px 16px rgba(10,30,60,.35))}
+.bcard .page.sub::after{background:var(--accent);bottom:10px;right:10px}
+.bcard .page.sub .peek{position:absolute;top:22px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:0}
+.bcard .page.sub .peek i{width:20px;height:26px;border-radius:2px;background:#fff center/cover no-repeat;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.bcard:hover .page.sub{transform:translateY(-6px) scale(1.06);box-shadow:none}
 .bcard .page.link::after{background:#16a34a}
 .bcard .nm{font-size:11px;font-weight:600;color:#fff;text-shadow:0 0 4px rgba(4,18,40,.75),0 1px 2px rgba(4,18,40,.7);max-width:104px;text-align:center;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .bcard:hover .page{transform:translateY(-6px) scale(1.06);box-shadow:0 0 0 2px var(--accent),0 16px 30px rgba(10,30,60,.38)}
@@ -1263,6 +1269,13 @@ function openBurst(it){
     c.style.setProperty("--d", (i*35)+"ms");
     c.style.setProperty("--d2", ((n-1-i)*25)+"ms");
     const im = firstImg(f);
+    if (isSub(f)){
+      const peek = FOLDERS[f.sub].files.filter(x => !isSub(x)).slice(0,3).map(x => { const u = firstImg(x); return `<i${u ? ` style="background-image:url(${u})"` : ""}></i>`; }).join("");
+      c.innerHTML = `<div class="page sub" data-ext="${FOLDERS[f.sub].files.length} items"><span class="peek">${peek}</span>${SVG.folder(84)}</div><div class="nm">${esc(FOLDERS[f.sub].name)}</div>`;
+      c.addEventListener("click", () => { openFinder(f.sub, c); closeBurst(); });
+      burstEl.appendChild(c);
+      return;
+    }
     c.innerHTML = im
       ? `<div class="page img" data-ext="MD" style="background-image:url(${im})"></div><div class="nm">${esc(f.name)}</div>`
       : `<div class="page" data-ext="MD"><b>${esc(s.title)}</b>${esc(s.body)}<i style="width:90%"></i><i style="width:70%"></i><i style="width:82%"></i></div><div class="nm">${esc(f.name)}</div>`;
