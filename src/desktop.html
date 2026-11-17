@@ -534,6 +534,11 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .dk .dot{background:rgba(235,238,255,.85)}
 #dock{background:linear-gradient(180deg,rgba(40,42,74,.55),rgba(20,22,40,.6));box-shadow:inset 0 .5px 0 rgba(255,255,255,.22),inset 0 0 0 .5px rgba(150,160,255,.18),0 10px 30px rgba(4,5,18,.5)}
 .dsep{background:rgba(200,206,255,.2)}
+/* ===== Wallpaper logo: its own layer so it can move ===== */
+.wp-logo{position:absolute;z-index:1;display:grid;place-items:center;border-radius:50%}
+.wp-logo img{width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 6px 14px rgba(4,5,20,.55))}
+#mobile .wp-logo{z-index:0;pointer-events:none}
+.m-scroll{position:relative;z-index:1}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1917,6 +1922,19 @@ MOBILE_Q.addEventListener ? MOBILE_Q.addEventListener("change", applyMode) : MOB
 applyMode();
 $("#widgets").insertAdjacentHTML("beforeend", WIDGETS.music()); drawMusic();
 tick(); setInterval(tick, 1000);
+
+/* ============ Wallpaper logo ============ */
+/* The P sits on its own layer, lined up with where the wallpaper puts it (centre 999.5,687 of a 2000x1379 image). */
+const WP = { w:2000, h:1379, cx:999.5, cy:687, size:118 };
+function placeWpLogo(node, host, xAlign){
+  const W = host.clientWidth || innerWidth, H = host.clientHeight || innerHeight, s = Math.max(W/WP.w, H/WP.h), z = WP.size*s;
+  Object.assign(node.style, { width:z+"px", height:z+"px", left:((W-WP.w*s)*xAlign + WP.cx*s - z/2)+"px", top:((H-WP.h*s)/2 + WP.cy*s - z/2)+"px" });
+}
+const wpLogo = el("div","wp-logo",`<img src="${PROFILE.logo}" alt="" draggable="false">`);
+const mLogo = el("div","wp-logo",`<img src="${PROFILE.logo}" alt="" draggable="false">`);
+$("#desktop").prepend(wpLogo); $("#mobile").prepend(mLogo);
+const placeLogos = () => { placeWpLogo(wpLogo, $("#desktop"), .5); placeWpLogo(mLogo, $("#mobile"), .38); };
+placeLogos(); addEventListener("resize", placeLogos);
 
 /* ============ Welcome notification ============ */
 if (!isMobile()) setTimeout(() => {
