@@ -541,6 +541,24 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .m-scroll{position:relative;z-index:1}
 .wp-logo.spin img{animation:wpSpin .22s linear infinite}
 @keyframes wpSpin{to{transform:rotate(360deg)}}
+/* ===== Weather (London, live) ===== */
+.wg-wx{padding:13px 15px 12px;color:#fff;background:linear-gradient(165deg,#0f1d44,#2a3a6e 70%,#3b4a80)}
+.wg-wx.day{background:linear-gradient(165deg,#2f7fd8,#69adf0)}
+.wg-wx.day.grey{background:linear-gradient(165deg,#5f7189,#93a4ba)}
+.wg-wx.day.wet{background:linear-gradient(165deg,#435670,#71849c)}
+.wg-wx.night.grey,.wg-wx.night.wet{background:linear-gradient(165deg,#1b2233,#384258)}
+.wx-top{display:flex;justify-content:space-between;align-items:flex-start}
+.wx-city{display:flex;align-items:center;gap:4px;font:600 13px/1.1 var(--font-display)}
+.wx-city svg{width:9px;height:9px}
+.wx-t{display:block;font:300 38px/1 var(--font-display);margin-top:2px;letter-spacing:-.02em}
+.wx-r{display:grid;justify-items:end;gap:2px;font-size:11px;font-weight:600}
+.wx-r .wx-hl{font-weight:500;opacity:.85}
+.wx-ic{width:18px;height:18px;display:block}
+.wx-hrs{display:grid;grid-template-columns:repeat(6,1fr);margin-top:10px;padding-top:9px;border-top:.5px solid rgba(255,255,255,.22);text-align:center}
+.wx-hrs div{display:grid;justify-items:center;gap:5px}
+.wx-hrs small{font-size:10px;font-weight:600;opacity:.8}
+.wx-hrs b{font-size:12px;font-weight:600}
+.wx-off{font-size:11px;opacity:.75;margin-top:14px}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1707,7 +1725,48 @@ const WIDGETS = {
     return `<div class="wg wide wg-rem" aria-label="Reminders"><div class="rh"><span class="ri"><svg viewBox="0 0 16 16" fill="#fff"><circle cx="3" cy="4" r="1.4"/><circle cx="3" cy="8" r="1.4"/><circle cx="3" cy="12" r="1.4"/><rect x="6" y="3.2" width="8" height="1.6" rx=".8"/><rect x="6" y="7.2" width="8" height="1.6" rx=".8"/><rect x="6" y="11.2" width="8" height="1.6" rx=".8"/></svg></span><b>dk's list</b><span class="rc">${open}</span></div><ul>${TODOS.filter(t=>!t.done).map(row).join("")}<li class="sec">done</li>${TODOS.filter(t=>t.done).map(row).join("")}</ul></div>`;
   }
 };
-$("#widgets").innerHTML = ["photo","clock","cal","pythe","rem"].map(k=>WIDGETS[k]()).join("");
+/* ============ Weather: London, live from open-meteo ============ */
+const WX_URL = "https://api.open-meteo.com/v1/forecast?latitude=51.5074&longitude=-0.1278&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLondon&forecast_days=2";
+let WX = null;
+const wxKind = c => c<=1 ? "clear" : c===2 ? "part" : c===3 ? "cloud" : c<=48 ? "fog" : c<=67 || (c>=80&&c<=82) ? "rain" : c<=77 || c===85 || c===86 ? "snow" : "storm";
+const WX_TXT = { clear:["Sunny","Clear"], part:["Partly Cloudy","Partly Cloudy"], cloud:["Cloudy","Cloudy"], fog:["Foggy","Foggy"], rain:["Rain","Rain"], snow:["Snow","Snow"], storm:["Thunderstorms","Thunderstorms"] };
+function wxIcon(code, day){
+  const k = wxKind(code), cloud = (x=0,y=0,f="#fff") => `<path transform="translate(${x} ${y})" d="M5 15h9a3.2 3.2 0 0 0 .3-6.4A4.6 4.6 0 0 0 5.6 9.4 2.9 2.9 0 0 0 5 15z" fill="${f}"/>`;
+  const sun = (x=10,y=10,r=4) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#ffd23f"/>`;
+  const moon = (x=10,y=10) => `<path d="M${x+3.5} ${y+3.2}A5 5 0 0 1 ${x-1.6} ${y-4.6}a5.2 5.2 0 1 0 ${5.1} ${7.8}z" fill="#f2f4ff"/>`;
+  const body = k==="clear" ? (day ? sun(10,10,5) : moon())
+    : k==="part" ? (day ? sun(13,7,3.6) : `<g transform="translate(3 -3) scale(.75)">${moon()}</g>`) + cloud(0,1)
+    : k==="cloud" || k==="fog" ? cloud(-1,0,"#e9eef5") + (k==="fog" ? `<path d="M3 17.5h13M5 19.5h10" stroke="#e9eef5" stroke-width="1.2" stroke-linecap="round"/>` : "")
+    : k==="rain" ? cloud(0,-2) + `<path d="M7 15.5l-1 3M10.5 15.5l-1 3M14 15.5l-1 3" stroke="#6cc3ff" stroke-width="1.5" stroke-linecap="round"/>`
+    : k==="snow" ? cloud(0,-2) + `<g fill="#fff"><circle cx="7" cy="17" r="1"/><circle cx="10.5" cy="18.5" r="1"/><circle cx="14" cy="17" r="1"/></g>`
+    : cloud(0,-2,"#d9dfe8") + `<path d="M11 13.5l-2.5 3.5h2.4l-1.4 3" stroke="#ffd23f" stroke-width="1.4" fill="none" stroke-linejoin="round"/>`;
+  return `<svg class="wx-ic" viewBox="0 0 20 20" aria-hidden="true">${body}</svg>`;
+}
+const wxHour = t => { const h = +t.slice(11,13); return (h % 12 || 12) + (h < 12 ? "AM" : "PM"); };
+function wxInner(){
+  const city = `<b class="wx-city">London <svg viewBox="0 0 10 10" fill="#fff"><path d="M9 1L1 4.6l3.6 1L5.6 9z"/></svg></b>`;
+  if (!WX) return `<div class="wx-top"><div>${city}<span class="wx-t">--°</span></div></div><div class="wx-off">checking the sky…</div>`;
+  const c = WX.current, H = WX.hourly, D = WX.daily, k = wxKind(c.weather_code), day = !!c.is_day;
+  let i = H.time.findIndex(t => t.slice(0,13) === c.time.slice(0,13)); if (i < 0) i = 0;
+  const hrs = H.time.slice(i, i+6).map((t,j) => `<div><small>${j ? wxHour(t) : "Now"}</small>${wxIcon(H.weather_code[i+j], !!H.is_day[i+j])}<b>${Math.round(j ? H.temperature_2m[i+j] : c.temperature_2m)}°</b></div>`).join("");
+  return `<div class="wx-top"><div>${city}<span class="wx-t">${Math.round(c.temperature_2m)}°</span></div>
+    <div class="wx-r">${wxIcon(c.weather_code, day)}<span>${WX_TXT[k][day?0:1]}</span><span class="wx-hl">H:${Math.round(D.temperature_2m_max[0])}° L:${Math.round(D.temperature_2m_min[0])}°</span></div></div>
+    <div class="wx-hrs">${hrs}</div>`;
+}
+WIDGETS.weather = () => `<div class="wg wide wg-wx" aria-label="London weather">${wxInner()}</div>`;
+function drawWeather(){
+  const k = WX && wxKind(WX.current.weather_code);
+  document.querySelectorAll(".wg-wx").forEach(w => {
+    w.innerHTML = wxInner();
+    w.classList.toggle("day", !!WX?.current.is_day); w.classList.toggle("night", !!WX && !WX.current.is_day);
+    w.classList.toggle("grey", k==="cloud" || k==="fog"); w.classList.toggle("wet", k==="rain" || k==="snow" || k==="storm");
+  });
+}
+async function loadWeather(){
+  try { const r = await fetch(WX_URL); if (r.ok) WX = await r.json(); } catch {}
+  drawWeather();
+}
+$("#widgets").innerHTML = ["photo","clock","cal","pythe","weather","rem"].map(k=>WIDGETS[k]()).join("");
 document.addEventListener("click", ev => {
   const rk = ev.target.closest(".rk");
   if (rk){
@@ -1923,6 +1982,7 @@ buildMobile();
 MOBILE_Q.addEventListener ? MOBILE_Q.addEventListener("change", applyMode) : MOBILE_Q.addListener(applyMode);
 applyMode();
 $("#widgets").insertAdjacentHTML("beforeend", WIDGETS.music()); drawMusic();
+loadWeather(); setInterval(loadWeather, 15*60*1000);
 tick(); setInterval(tick, 1000);
 
 /* ============ Wallpaper logo ============ */
