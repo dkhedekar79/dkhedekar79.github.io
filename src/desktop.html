@@ -1917,7 +1917,7 @@ function buildMobile(){
     `<a class="m-app" href="${PROFILE.links.github}" target="_blank" rel="noopener"><span class="mi">${SVG.github}</span><span>GitHub</span></a>`,
     `<button class="m-app" data-desk="3"><span class="mi">${SVG.mail}</span><span>Contact</span></button>`
   ];
-  grid.innerHTML = WIDGETS.photo() + WIDGETS.cal() + WIDGETS.rem() + WIDGETS.music() + apps.join("") + WIDGETS.clock() + WIDGETS.pythe();
+  grid.innerHTML = WIDGETS.photo() + WIDGETS.cal() + WIDGETS.weather() + WIDGETS.rem() + WIDGETS.music() + apps.join("") + WIDGETS.clock() + WIDGETS.pythe();
   $("#mDock").innerHTML = [["Pythe",SVG.pythe,"pythe"],["LinkedIn",SVG.linkedin,"linkedin"],["Instagram",SVG.instagram,"instagram"],["X",SVG.x,"x"]]
     .map(([l,ic,k]) => `<a class="m-app" href="${PROFILE.links[k]}" target="_blank" rel="noopener" aria-label="${l}"><span class="mi">${ic}</span></a>`).join("");
   $("#mHello").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
