@@ -566,6 +566,11 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 /* ===== Trash: drop things on it ===== */
 .binned{display:none!important}
 .dk.hot .ico{transform:scale(1.4)!important}
+.fputback[hidden]{display:none}
+.fputback{display:flex;justify-content:flex-end;gap:8px;padding:8px 14px 0}
+.fputback button{font-size:12px;padding:3px 10px;border-radius:6px;background:rgba(0,0,0,.06);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12)}
+.fputback button:hover{background:rgba(0,0,0,.1)}
+.fwgico{display:block;width:46px;height:46px;border-radius:12px;background:linear-gradient(160deg,#4c5bd8,#1f2550);box-shadow:inset 0 .5px 0 rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.2)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1425,8 +1430,8 @@ const NAV = [
   { key:"trash", label:"Trash", icon:SVG.side.trash }
 ];
 function folderContents(key){
-  if (key === "desktop") return desktopItems.map(it => it.kind==="folder" ? {kind:"folder",key:it.key,name:it.name} : {kind:"file",file:it.file,name:it.name});
-  if (key === "trash") return TRASH.map(f=>({kind:"file",file:f,name:f.name}));
+  if (key === "desktop") return desktopItems.filter(it => !it.el.classList.contains("binned")).map(it => it.kind==="folder" ? {kind:"folder",key:it.key,name:it.name} : {kind:"file",file:it.file,name:it.name});
+  if (key === "trash") return [...binned.map(b=>({kind:"binned",b,name:b.name})), ...TRASH.map(f=>({kind:"file",file:f,name:f.name}))];
   return FOLDERS[key].files.map(f => isSub(f) ? {kind:"folder",key:f.sub,name:FOLDERS[f.sub].name} : {kind:"file",file:f,name:f.name});
 }
 const labelOf = k => k==="desktop"?"Desktop":k==="trash"?"Trash":FOLDERS[k].name;
@@ -1460,14 +1465,17 @@ function navTo(W, key, noHist){
   const items = folderContents(key);
   items.forEach((it,i) => {
     const thumb = it.kind === "file" && firstImg(it.file);
-    const b = el("button","fitem", `<div class="art">${it.kind==="folder"?SVG.folder(58):thumb?`<span class="fthumb" style="background-image:url(${thumb})"></span>`:SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
+    const b = el("button","fitem", `<div class="art">${it.kind==="binned"?binArt(it.b):it.kind==="folder"?SVG.folder(58):thumb?`<span class="fthumb" style="background-image:url(${thumb})"></span>`:SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
     b.onclick = () => { grid.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
-    b.ondblclick = () => it.kind==="folder" ? navTo(W, it.key) : openDoc(it.file, b);
+    b.ondblclick = () => it.kind==="binned" ? putBack(it.b) : it.kind==="folder" ? navTo(W, it.key) : openDoc(it.file, b);
     b.onkeydown = e => { if (e.key==="Enter") b.ondblclick(); };
     if (!reduce) b.animate([{opacity:0,transform:"translateY(6px) scale(.96)"},{opacity:1,transform:"none"}],{duration:260,delay:i*22,fill:"backwards",easing:"ease-out"});
     grid.appendChild(b);
   });
-  $(".fpath",W.body).textContent = `Macintosh HD › Users › ${PROFILE.short.toLowerCase()} › ${W.title}  ·  ${items.length} item${items.length===1?"":"s"}  ·  Double-click to open`;
+  $(".fpath",W.body).textContent = `Macintosh HD › Users › ${PROFILE.short.toLowerCase()} › ${W.title}  ·  ${items.length} item${items.length===1?"":"s"}  ·  Double-click to ${key==="trash" && binned.length ? "put back" : "open"}`;
+  let pb = $(".fputback",W.body);
+  if (!pb){ pb = el("div","fputback",`<button>Put Back All</button>`); grid.before(pb); pb.firstChild.onclick = () => [...binned].forEach(putBack); }
+  pb.hidden = !(key === "trash" && binned.length);
   renderMinis();
 }
 
@@ -2006,6 +2014,7 @@ function overTrash(x, y){
   return x > r.left - 14 && x < r.right + 14 && y > r.top - 18 && y < r.bottom + 10;
 }
 function trashHot(on){ dockEls.trash?.classList.toggle("hot", !!on); }
+function refreshTrashViews(){ wins.filter(W => W.app === "Finder" && (W.cur === "trash" || W.cur === "desktop")).forEach(W => navTo(W, W.cur, true)); }
 function flyToTrash(node, done){
   const t = dockEls.trash, tr = t.getBoundingClientRect(), r = node.getBoundingClientRect();
   const dx = tr.left + tr.width/2 - (r.left + r.width/2), dy = tr.top + tr.height/2 - (r.top + r.height/2);
@@ -2013,10 +2022,20 @@ function flyToTrash(node, done){
   a.onfinish = () => {
     done();
     if (!reduce){ t.classList.remove("bounce"); void t.offsetWidth; t.classList.add("bounce"); setTimeout(() => t.classList.remove("bounce"), 600); }
+    refreshTrashViews();
   };
 }
 function binIcon(it){ selectIcon(null); flyToTrash(it.el, () => { it.el.classList.add("binned"); binned.unshift({ kind:"icon", it, name:it.name }); }); }
 function binWidget(w, from){ flyToTrash(w, () => { w.classList.add("binned"); if (from){ w.style.left = from[0]+"px"; w.style.top = from[1]+"px"; } binned.unshift({ kind:"widget", w, name:WNAME[wgKey(w)] || "Widget" }); saveWpos(); }); }
+function putBack(b){
+  const i = binned.indexOf(b); if (i < 0) return; binned.splice(i, 1);
+  const node = b.kind === "icon" ? b.it.el : b.w;
+  node.classList.remove("binned");
+  if (b.kind === "icon") layoutIcons(); else { clampWidget(node); saveWpos(); }
+  if (!reduce) node.animate([{ opacity:0, transform:"scale(.6)" }, { opacity:1, transform:"none" }], { duration:320, easing:"cubic-bezier(.3,1.4,.5,1)" });
+  refreshTrashViews();
+}
+const binArt = b => b.kind === "widget" ? `<span class="fwgico"></span>` : b.it.kind === "folder" ? SVG.folder(58) : SVG.mdfile(54);
 
 /* ============ Widgets: pick up and move anywhere ============ */
 const wgWrap = $("#widgets"), WPOS_KEY = "dk.widgetPos.v1";
