@@ -539,6 +539,8 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .wp-logo img{width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 6px 14px rgba(4,5,20,.55))}
 #mobile .wp-logo{z-index:0;pointer-events:none}
 .m-scroll{position:relative;z-index:1}
+.wp-logo.spin img{animation:wpSpin .22s linear infinite}
+@keyframes wpSpin{to{transform:rotate(360deg)}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1935,6 +1937,22 @@ const mLogo = el("div","wp-logo",`<img src="${PROFILE.logo}" alt="" draggable="f
 $("#desktop").prepend(wpLogo); $("#mobile").prepend(mLogo);
 const placeLogos = () => { placeWpLogo(wpLogo, $("#desktop"), .5); placeWpLogo(mLogo, $("#mobile"), .38); };
 placeLogos(); addEventListener("resize", placeLogos);
+
+/* hover the P and it spins flat out, then coasts to a stop upright */
+function spinLogo(node){
+  const img = node.firstChild; let coast;
+  const start = () => { coast?.cancel(); node.classList.add("spin"); };
+  const stop = () => {
+    if (!node.classList.contains("spin")) return;
+    const m = new DOMMatrix(getComputedStyle(img).transform);
+    const a = ((Math.atan2(m.b, m.a) * 180 / Math.PI) + 360) % 360;
+    node.classList.remove("spin");
+    coast = img.animate([{ transform:`rotate(${a}deg)` }, { transform:"rotate(720deg)" }], { duration:1500, easing:"cubic-bezier(.15,.5,.3,1)" });
+  };
+  node.addEventListener("pointerenter", start);
+  node.addEventListener("pointerleave", stop);
+}
+spinLogo(wpLogo);
 
 /* ============ Welcome notification ============ */
 if (!isMobile()) setTimeout(() => {
