@@ -188,7 +188,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.025)}
 .wg-rem li.done span{color:#8e8e93}
 .wg-rem li span{flex:1;min-width:0}
 .wg-rem em{font-style:normal;font-size:10px;font-weight:600;color:#ff9500;background:rgba(255,149,0,.13);padding:2px 6px;border-radius:6px;flex:none}
-@media (max-height:780px){#widgets .wg-cal,#widgets .wg-pythe{display:none}}
+@media (max-height:960px){#widgets .wg-cal,#widgets .wg-pythe{display:none}}
 .pyico{display:grid;place-items:center;width:100%;height:100%;background:linear-gradient(#fff,#eceff4);border-radius:22%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12)}
 .pyico img{width:82%;height:82%;object-fit:contain}
 #spot li .mi .pyico{width:24px;height:24px}
@@ -570,6 +570,36 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .m-scroll{position:relative;z-index:1}
 .wp-logo.spin img{animation:wpSpin .22s linear infinite}
 @keyframes wpSpin{to{transform:rotate(360deg)}}
+/* ===== Weather (London, live) ===== */
+.wg-wx{padding:13px 15px 12px;color:#fff;background:linear-gradient(165deg,#0f1d44,#2a3a6e 70%,#3b4a80)}
+.wg-wx.day{background:linear-gradient(165deg,#2f7fd8,#69adf0)}
+.wg-wx.day.grey{background:linear-gradient(165deg,#5f7189,#93a4ba)}
+.wg-wx.day.wet{background:linear-gradient(165deg,#435670,#71849c)}
+.wg-wx.night.grey,.wg-wx.night.wet{background:linear-gradient(165deg,#1b2233,#384258)}
+.wx-top{display:flex;justify-content:space-between;align-items:flex-start}
+.wx-city{display:flex;align-items:center;gap:4px;font:600 13px/1.1 var(--font-display)}
+.wx-city svg{width:9px;height:9px}
+.wx-t{display:block;font:300 38px/1 var(--font-display);margin-top:2px;letter-spacing:-.02em}
+.wx-r{display:grid;justify-items:end;gap:2px;font-size:11px;font-weight:600}
+.wx-r .wx-hl{font-weight:500;opacity:.85}
+.wx-ic{width:18px;height:18px;display:block}
+.wx-hrs{display:grid;grid-template-columns:repeat(6,1fr);margin-top:10px;padding-top:9px;border-top:.5px solid rgba(255,255,255,.22);text-align:center}
+.wx-hrs div{display:grid;justify-items:center;gap:5px}
+.wx-hrs small{font-size:10px;font-weight:600;opacity:.8}
+.wx-hrs b{font-size:12px;font-weight:600}
+.wx-off{font-size:11px;opacity:.75;margin-top:14px}
+/* ===== Widgets you can pick up and move ===== */
+#widgets.free{display:block;width:0;height:0}
+#widgets.free>.wg{position:absolute;margin:0}
+#widgets .wg.dragging{transition:none;transform:scale(1.04);box-shadow:inset 0 1px 1px rgba(255,255,255,.3),0 24px 50px rgba(3,4,16,.55);cursor:grabbing}
+/* ===== Trash: drop things on it ===== */
+.binned{display:none!important}
+.dk.hot .ico{transform:scale(1.4)!important}
+.fputback[hidden]{display:none}
+.fputback{display:flex;justify-content:flex-end;gap:8px;padding:8px 14px 0}
+.fputback button{font-size:12px;padding:3px 10px;border-radius:6px;background:rgba(0,0,0,.06);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12)}
+.fputback button:hover{background:rgba(0,0,0,.1)}
+.fwgico{display:block;width:46px;height:46px;border-radius:12px;background:linear-gradient(160deg,#4c5bd8,#1f2550);box-shadow:inset 0 .5px 0 rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.2)}
 </style>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
 </head>
@@ -1202,11 +1232,11 @@ desktopItems.forEach((it, i) => {
     if (!down) return;
     const dx = ev.clientX - sx, dy = ev.clientY - sy;
     if (!moved && Math.hypot(dx,dy) > 5){ moved = true; e.classList.add("dragging"); closeBurst(); hideQL(true); }
-    if (moved){ e.style.left = (ox+dx)+"px"; e.style.top = Math.max(0, oy+dy)+"px"; }
+    if (moved){ e.style.left = (ox+dx)+"px"; e.style.top = Math.max(0, oy+dy)+"px"; trashHot(overTrash(ev.clientX, ev.clientY)); }
   });
   e.addEventListener("pointerup", ev => {
     if (!down) return; down = false; e.classList.remove("dragging");
-    if (moved){ userPos.set(i, {x:e.offsetLeft, y:e.offsetTop}); return; }
+    if (moved){ trashHot(false); if (overTrash(ev.clientX, ev.clientY)) return binIcon(it); userPos.set(i, {x:e.offsetLeft, y:e.offsetTop}); return; }
     openItem(it, e);
   });
   e.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); openItem(it, e); } });
@@ -1432,8 +1462,8 @@ const NAV = [
   { key:"trash", label:"Trash", icon:SVG.side.trash }
 ];
 function folderContents(key){
-  if (key === "desktop") return desktopItems.map(it => it.kind==="folder" ? {kind:"folder",key:it.key,name:it.name} : {kind:"file",file:it.file,name:it.name});
-  if (key === "trash") return TRASH.map(f=>({kind:"file",file:f,name:f.name}));
+  if (key === "desktop") return desktopItems.filter(it => !it.el.classList.contains("binned")).map(it => it.kind==="folder" ? {kind:"folder",key:it.key,name:it.name} : {kind:"file",file:it.file,name:it.name});
+  if (key === "trash") return [...binned.map(b=>({kind:"binned",b,name:b.name})), ...TRASH.map(f=>({kind:"file",file:f,name:f.name}))];
   return FOLDERS[key].files.map(f => isSub(f) ? {kind:"folder",key:f.sub,name:FOLDERS[f.sub].name} : {kind:"file",file:f,name:f.name});
 }
 const labelOf = k => k==="desktop"?"Desktop":k==="trash"?"Trash":FOLDERS[k].name;
@@ -1467,14 +1497,17 @@ function navTo(W, key, noHist){
   const items = folderContents(key);
   items.forEach((it,i) => {
     const thumb = it.kind === "file" && firstImg(it.file);
-    const b = el("button","fitem", `<div class="art">${it.kind==="folder"?SVG.folder(58):thumb?`<span class="fthumb" style="background-image:url(${thumb})"></span>`:SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
+    const b = el("button","fitem", `<div class="art">${it.kind==="binned"?binArt(it.b):it.kind==="folder"?SVG.folder(58):thumb?`<span class="fthumb" style="background-image:url(${thumb})"></span>`:SVG.mdfile(54)}</div><span>${esc(it.name)}</span>`);
     b.onclick = () => { grid.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
-    b.ondblclick = () => it.kind==="folder" ? navTo(W, it.key) : openDoc(it.file, b);
+    b.ondblclick = () => it.kind==="binned" ? putBack(it.b) : it.kind==="folder" ? navTo(W, it.key) : openDoc(it.file, b);
     b.onkeydown = e => { if (e.key==="Enter") b.ondblclick(); };
     if (!reduce) b.animate([{opacity:0,transform:"translateY(6px) scale(.96)"},{opacity:1,transform:"none"}],{duration:260,delay:i*22,fill:"backwards",easing:"ease-out"});
     grid.appendChild(b);
   });
-  $(".fpath",W.body).textContent = `Macintosh HD › Users › ${PROFILE.short.toLowerCase()} › ${W.title}  ·  ${items.length} item${items.length===1?"":"s"}  ·  Double-click to open`;
+  $(".fpath",W.body).textContent = `Macintosh HD › Users › ${PROFILE.short.toLowerCase()} › ${W.title}  ·  ${items.length} item${items.length===1?"":"s"}  ·  Double-click to ${key==="trash" && binned.length ? "put back" : "open"}`;
+  let pb = $(".fputback",W.body);
+  if (!pb){ pb = el("div","fputback",`<button>Put Back All</button>`); grid.before(pb); pb.firstChild.onclick = () => [...binned].forEach(putBack); }
+  pb.hidden = !(key === "trash" && binned.length);
   renderMinis();
 }
 
@@ -1665,6 +1698,11 @@ $("#desktop").addEventListener("contextmenu", ev => {
   showMenu(null, [["New Finder Window", ()=>openFinder("desktop")],["Open Terminal Here", ()=>openTerminal()],0,["Clean Up", cleanUp],["Show View Options", null],0,["About This Site", ()=>openAbout()]], ev.clientX, ev.clientY);
 });
 function cleanUp(){
+  if (wgWrap.classList.contains("free")){
+    wgWrap.classList.remove("free");
+    wgWrap.querySelectorAll(":scope>.wg").forEach(w => { w.style.left = w.style.top = w.style.width = w.style.zIndex = ""; });
+    try { localStorage.removeItem(WPOS_KEY); } catch {}
+  }
   const before = desktopItems.map(it => it.el.getBoundingClientRect());
   userPos.clear(); layoutIcons();
   desktopItems.forEach((it,i) => { const a = it.el.getBoundingClientRect(); it.el.animate([{transform:`translate(${before[i].left-a.left}px,${before[i].top-a.top}px)`},{transform:"none"}],{duration:450,easing:"cubic-bezier(.3,1.2,.5,1)"}); });
@@ -1739,7 +1777,48 @@ const WIDGETS = {
     return `<div class="wg wide wg-rem" aria-label="Reminders"><div class="rh"><span class="ri"><svg viewBox="0 0 16 16" fill="#fff"><circle cx="3" cy="4" r="1.4"/><circle cx="3" cy="8" r="1.4"/><circle cx="3" cy="12" r="1.4"/><rect x="6" y="3.2" width="8" height="1.6" rx=".8"/><rect x="6" y="7.2" width="8" height="1.6" rx=".8"/><rect x="6" y="11.2" width="8" height="1.6" rx=".8"/></svg></span><b>dk's list</b><span class="rc">${open}</span></div><ul>${TODOS.filter(t=>!t.done).map(row).join("")}<li class="sec">done</li>${TODOS.filter(t=>t.done).map(row).join("")}</ul></div>`;
   }
 };
-$("#widgets").innerHTML = ["photo","clock","cal","pythe","rem"].map(k=>WIDGETS[k]()).join("");
+/* ============ Weather: London, live from open-meteo ============ */
+const WX_URL = "https://api.open-meteo.com/v1/forecast?latitude=51.5074&longitude=-0.1278&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLondon&forecast_days=2";
+let WX = null;
+const wxKind = c => c<=1 ? "clear" : c===2 ? "part" : c===3 ? "cloud" : c<=48 ? "fog" : c<=67 || (c>=80&&c<=82) ? "rain" : c<=77 || c===85 || c===86 ? "snow" : "storm";
+const WX_TXT = { clear:["Sunny","Clear"], part:["Partly Cloudy","Partly Cloudy"], cloud:["Cloudy","Cloudy"], fog:["Foggy","Foggy"], rain:["Rain","Rain"], snow:["Snow","Snow"], storm:["Thunderstorms","Thunderstorms"] };
+function wxIcon(code, day){
+  const k = wxKind(code), cloud = (x=0,y=0,f="#fff") => `<path transform="translate(${x} ${y})" d="M5 15h9a3.2 3.2 0 0 0 .3-6.4A4.6 4.6 0 0 0 5.6 9.4 2.9 2.9 0 0 0 5 15z" fill="${f}"/>`;
+  const sun = (x=10,y=10,r=4) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#ffd23f"/>`;
+  const moon = (x=10,y=10) => `<path d="M${x+3.5} ${y+3.2}A5 5 0 0 1 ${x-1.6} ${y-4.6}a5.2 5.2 0 1 0 ${5.1} ${7.8}z" fill="#f2f4ff"/>`;
+  const body = k==="clear" ? (day ? sun(10,10,5) : moon())
+    : k==="part" ? (day ? sun(13,7,3.6) : `<g transform="translate(3 -3) scale(.75)">${moon()}</g>`) + cloud(0,1)
+    : k==="cloud" || k==="fog" ? cloud(-1,0,"#e9eef5") + (k==="fog" ? `<path d="M3 17.5h13M5 19.5h10" stroke="#e9eef5" stroke-width="1.2" stroke-linecap="round"/>` : "")
+    : k==="rain" ? cloud(0,-2) + `<path d="M7 15.5l-1 3M10.5 15.5l-1 3M14 15.5l-1 3" stroke="#6cc3ff" stroke-width="1.5" stroke-linecap="round"/>`
+    : k==="snow" ? cloud(0,-2) + `<g fill="#fff"><circle cx="7" cy="17" r="1"/><circle cx="10.5" cy="18.5" r="1"/><circle cx="14" cy="17" r="1"/></g>`
+    : cloud(0,-2,"#d9dfe8") + `<path d="M11 13.5l-2.5 3.5h2.4l-1.4 3" stroke="#ffd23f" stroke-width="1.4" fill="none" stroke-linejoin="round"/>`;
+  return `<svg class="wx-ic" viewBox="0 0 20 20" aria-hidden="true">${body}</svg>`;
+}
+const wxHour = t => { const h = +t.slice(11,13); return (h % 12 || 12) + (h < 12 ? "AM" : "PM"); };
+function wxInner(){
+  const city = `<b class="wx-city">London <svg viewBox="0 0 10 10" fill="#fff"><path d="M9 1L1 4.6l3.6 1L5.6 9z"/></svg></b>`;
+  if (!WX) return `<div class="wx-top"><div>${city}<span class="wx-t">--°</span></div></div><div class="wx-off">checking the sky…</div>`;
+  const c = WX.current, H = WX.hourly, D = WX.daily, k = wxKind(c.weather_code), day = !!c.is_day;
+  let i = H.time.findIndex(t => t.slice(0,13) === c.time.slice(0,13)); if (i < 0) i = 0;
+  const hrs = H.time.slice(i, i+6).map((t,j) => `<div><small>${j ? wxHour(t) : "Now"}</small>${wxIcon(H.weather_code[i+j], !!H.is_day[i+j])}<b>${Math.round(j ? H.temperature_2m[i+j] : c.temperature_2m)}°</b></div>`).join("");
+  return `<div class="wx-top"><div>${city}<span class="wx-t">${Math.round(c.temperature_2m)}°</span></div>
+    <div class="wx-r">${wxIcon(c.weather_code, day)}<span>${WX_TXT[k][day?0:1]}</span><span class="wx-hl">H:${Math.round(D.temperature_2m_max[0])}° L:${Math.round(D.temperature_2m_min[0])}°</span></div></div>
+    <div class="wx-hrs">${hrs}</div>`;
+}
+WIDGETS.weather = () => `<div class="wg wide wg-wx" aria-label="London weather">${wxInner()}</div>`;
+function drawWeather(){
+  const k = WX && wxKind(WX.current.weather_code);
+  document.querySelectorAll(".wg-wx").forEach(w => {
+    w.innerHTML = wxInner();
+    w.classList.toggle("day", !!WX?.current.is_day); w.classList.toggle("night", !!WX && !WX.current.is_day);
+    w.classList.toggle("grey", k==="cloud" || k==="fog"); w.classList.toggle("wet", k==="rain" || k==="snow" || k==="storm");
+  });
+}
+async function loadWeather(){
+  try { const r = await fetch(WX_URL); if (r.ok) WX = await r.json(); } catch {}
+  drawWeather();
+}
+$("#widgets").innerHTML = ["photo","clock","cal","pythe","weather","rem"].map(k=>WIDGETS[k]()).join("");
 document.addEventListener("click", ev => {
   const rk = ev.target.closest(".rk");
   if (rk){
@@ -1890,7 +1969,7 @@ function buildMobile(){
     `<a class="m-app" href="${PROFILE.links.github}" target="_blank" rel="noopener"><span class="mi">${SVG.github}</span><span>GitHub</span></a>`,
     `<button class="m-app" data-desk="3"><span class="mi">${SVG.mail}</span><span>Contact</span></button>`
   ];
-  grid.innerHTML = WIDGETS.photo() + WIDGETS.cal() + WIDGETS.rem() + WIDGETS.music() + apps.join("") + WIDGETS.clock() + WIDGETS.pythe();
+  grid.innerHTML = WIDGETS.photo() + WIDGETS.cal() + WIDGETS.weather() + WIDGETS.rem() + WIDGETS.music() + apps.join("") + WIDGETS.clock() + WIDGETS.pythe();
   $("#mDock").innerHTML = [["Pythe",SVG.pythe,"pythe"],["LinkedIn",SVG.linkedin,"linkedin"],["Instagram",SVG.instagram,"instagram"],["X",SVG.x,"x"]]
     .map(([l,ic,k]) => `<a class="m-app" href="${PROFILE.links[k]}" target="_blank" rel="noopener" aria-label="${l}"><span class="mi">${ic}</span></a>`).join("");
   $("#mHello").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
@@ -1955,7 +2034,95 @@ buildMobile();
 MOBILE_Q.addEventListener ? MOBILE_Q.addEventListener("change", applyMode) : MOBILE_Q.addListener(applyMode);
 applyMode();
 $("#widgets").insertAdjacentHTML("beforeend", WIDGETS.music()); drawMusic();
+loadWeather(); setInterval(loadWeather, 15*60*1000);
 tick(); setInterval(tick, 1000);
+
+/* ============ Trash: drop icons and widgets on it ============ */
+const binned = [];
+const WNAME = { "wg-photo":"Photo Widget", "wg-clock":"Clock Widget", "wg-cal":"Calendar Widget", "wg-pythe":"Pythe Widget", "wg-wx":"Weather Widget", "wg-rem":"Reminders Widget", "wg-music":"Music Widget" };
+function overTrash(x, y){
+  const t = dockEls.trash; if (!t || isMobile()) return false;
+  const r = t.getBoundingClientRect();
+  return x > r.left - 14 && x < r.right + 14 && y > r.top - 18 && y < r.bottom + 10;
+}
+function trashHot(on){ dockEls.trash?.classList.toggle("hot", !!on); }
+function refreshTrashViews(){ wins.filter(W => W.app === "Finder" && (W.cur === "trash" || W.cur === "desktop")).forEach(W => navTo(W, W.cur, true)); }
+function flyToTrash(node, done){
+  const t = dockEls.trash, tr = t.getBoundingClientRect(), r = node.getBoundingClientRect();
+  const dx = tr.left + tr.width/2 - (r.left + r.width/2), dy = tr.top + tr.height/2 - (r.top + r.height/2);
+  const a = node.animate([{ transform:"none", opacity:1 }, { transform:`translate(${dx}px,${dy}px) scale(.1)`, opacity:.15 }], { duration: reduce ? 1 : 360, easing:"cubic-bezier(.5,0,.8,.4)" });
+  a.onfinish = () => {
+    done();
+    if (!reduce){ t.classList.remove("bounce"); void t.offsetWidth; t.classList.add("bounce"); setTimeout(() => t.classList.remove("bounce"), 600); }
+    refreshTrashViews();
+  };
+}
+function binIcon(it){ selectIcon(null); flyToTrash(it.el, () => { it.el.classList.add("binned"); binned.unshift({ kind:"icon", it, name:it.name }); }); }
+function binWidget(w, from){ flyToTrash(w, () => { w.classList.add("binned"); if (from){ w.style.left = from[0]+"px"; w.style.top = from[1]+"px"; } binned.unshift({ kind:"widget", w, name:WNAME[wgKey(w)] || "Widget" }); saveWpos(); }); }
+function putBack(b){
+  const i = binned.indexOf(b); if (i < 0) return; binned.splice(i, 1);
+  const node = b.kind === "icon" ? b.it.el : b.w;
+  node.classList.remove("binned");
+  if (b.kind === "icon") layoutIcons(); else { clampWidget(node); saveWpos(); }
+  if (!reduce) node.animate([{ opacity:0, transform:"scale(.6)" }, { opacity:1, transform:"none" }], { duration:320, easing:"cubic-bezier(.3,1.4,.5,1)" });
+  refreshTrashViews();
+}
+const binArt = b => b.kind === "widget" ? `<span class="fwgico"></span>` : b.it.kind === "folder" ? SVG.folder(58) : SVG.mdfile(54);
+
+/* ============ Widgets: pick up and move anywhere ============ */
+const wgWrap = $("#widgets"), WPOS_KEY = "dk.widgetPos.v1";
+let wgZ = 10;
+const wgKey = w => [...w.classList].find(c => c.startsWith("wg-") );
+function freezeWidgets(){
+  if (wgWrap.classList.contains("free")) return;
+  const kids = [...wgWrap.querySelectorAll(":scope>.wg")];
+  const boxes = kids.map(e => [e.offsetLeft, e.offsetTop, e.offsetWidth, getComputedStyle(e).display === "none"]);
+  wgWrap.classList.add("free");
+  kids.forEach((e,i) => { Object.assign(e.style, { left:boxes[i][0]+"px", top:boxes[i][1]+"px", width:boxes[i][2]+"px" }); if (boxes[i][3]) e.dataset.tucked = 1; });
+}
+function clampWidget(w){
+  const o = wgWrap.getBoundingClientRect(), r = w.getBoundingClientRect();
+  const x = Math.min(Math.max(r.left, 4 - r.width + 60), innerWidth - 60), y = Math.min(Math.max(r.top, 44), innerHeight - 60);
+  w.style.left = (x - o.left)+"px"; w.style.top = (y - o.top)+"px";
+}
+function saveWpos(){
+  const pos = {}; wgWrap.querySelectorAll(":scope>.wg").forEach(w => { if (getComputedStyle(w).display !== "none") pos[wgKey(w)] = [w.offsetLeft, w.offsetTop]; });
+  try { localStorage.setItem(WPOS_KEY, JSON.stringify(pos)); } catch {}
+}
+function loadWpos(){
+  let pos; try { pos = JSON.parse(localStorage.getItem(WPOS_KEY) || "null"); } catch {}
+  if (!pos || isMobile()) return;
+  freezeWidgets();
+  wgWrap.querySelectorAll(":scope>.wg").forEach(w => { const p = pos[wgKey(w)]; if (!p) return; w.style.left = p[0]+"px"; w.style.top = p[1]+"px"; clampWidget(w); });
+}
+const swallowClick = e => { e.stopPropagation(); e.preventDefault(); };
+wgWrap.addEventListener("dragstart", e => e.preventDefault());
+wgWrap.addEventListener("pointerdown", ev => {
+  const w = ev.target.closest(".wg");
+  if (!w || ev.button !== 0 || isMobile() || ev.target.closest(".rk,.ctl button,.bar")) return;
+  const sx = ev.clientX, sy = ev.clientY; let moved = false, ox = 0, oy = 0;
+  const move = e => {
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (!moved){
+      if (Math.hypot(dx, dy) < 5) return;
+      moved = true; freezeWidgets(); ox = w.offsetLeft; oy = w.offsetTop;
+      w.classList.add("dragging"); w.style.zIndex = ++wgZ; closeBurst(); hideQL(true);
+    }
+    w.style.left = (ox+dx)+"px"; w.style.top = (oy+dy)+"px";
+    trashHot(overTrash(e.clientX, e.clientY));
+  };
+  const up = e => {
+    removeEventListener("pointermove", move); removeEventListener("pointerup", up); removeEventListener("pointercancel", up);
+    if (!moved) return;
+    w.classList.remove("dragging"); trashHot(false);
+    addEventListener("click", swallowClick, true); setTimeout(() => removeEventListener("click", swallowClick, true), 0);
+    if (e.type === "pointerup" && overTrash(e.clientX, e.clientY)) binWidget(w, [ox, oy]);
+    else { clampWidget(w); saveWpos(); }
+  };
+  addEventListener("pointermove", move); addEventListener("pointerup", up); addEventListener("pointercancel", up);
+});
+loadWpos();
+addEventListener("resize", () => { if (wgWrap.classList.contains("free")) wgWrap.querySelectorAll(":scope>.wg").forEach(clampWidget); });
 
 /* ============ Wallpaper logo ============ */
 /* The P sits on its own layer, lined up with where the wallpaper puts it (centre 999.5,687 of a 2000x1379 image). */
