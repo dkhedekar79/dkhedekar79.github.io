@@ -159,7 +159,7 @@ a.wg:hover,button.wg:hover{transform:scale(1.025)}
 .wg-rem li.done span{color:#8e8e93}
 .wg-rem li span{flex:1;min-width:0}
 .wg-rem em{font-style:normal;font-size:10px;font-weight:600;color:#ff9500;background:rgba(255,149,0,.13);padding:2px 6px;border-radius:6px;flex:none}
-@media (max-height:960px){#widgets .wg-cal,#widgets .wg-pythe{display:none}}
+@media (max-height:820px){#widgets .wg-cal,#widgets .wg-pythe{display:none}}
 .pyico{display:grid;place-items:center;width:100%;height:100%;background:linear-gradient(#fff,#eceff4);border-radius:22%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12)}
 .pyico img{width:82%;height:82%;object-fit:contain}
 #spot li .mi .pyico{width:24px;height:24px}
@@ -571,6 +571,8 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .fputback button{font-size:12px;padding:3px 10px;border-radius:6px;background:rgba(0,0,0,.06);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12)}
 .fputback button:hover{background:rgba(0,0,0,.1)}
 .fwgico{display:block;width:46px;height:46px;border-radius:12px;background:linear-gradient(160deg,#4c5bd8,#1f2550);box-shadow:inset 0 .5px 0 rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.2)}
+/* ===== Compact pass: laptop screens read less zoomed in ===== */
+#widgets{transform:scale(var(--ws,.8));transform-origin:0 0}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2039,6 +2041,10 @@ const binArt = b => b.kind === "widget" ? `<span class="fwgico"></span>` : b.it.
 
 /* ============ Widgets: pick up and move anywhere ============ */
 const wgWrap = $("#widgets"), WPOS_KEY = "dk.widgetPos.v1";
+/* the column is drawn scaled down; WS converts screen pixels to its own */
+const WS = () => parseFloat(getComputedStyle(wgWrap).transform.split("(")[1]) || 1;
+const setWS = () => wgWrap.style.setProperty("--ws", innerWidth >= 1800 && innerHeight >= 1000 ? .92 : innerHeight < 760 ? .74 : .8);
+setWS(); addEventListener("resize", setWS);
 let wgZ = 10;
 const wgKey = w => [...w.classList].find(c => c.startsWith("wg-") );
 function freezeWidgets(){
@@ -2051,7 +2057,7 @@ function freezeWidgets(){
 function clampWidget(w){
   const o = wgWrap.getBoundingClientRect(), r = w.getBoundingClientRect();
   const x = Math.min(Math.max(r.left, 4 - r.width + 60), innerWidth - 60), y = Math.min(Math.max(r.top, 44), innerHeight - 60);
-  w.style.left = (x - o.left)+"px"; w.style.top = (y - o.top)+"px";
+  const k = WS(); w.style.left = (x - o.left)/k+"px"; w.style.top = (y - o.top)/k+"px";
 }
 function saveWpos(){
   const pos = {}; wgWrap.querySelectorAll(":scope>.wg").forEach(w => { if (getComputedStyle(w).display !== "none") pos[wgKey(w)] = [w.offsetLeft, w.offsetTop]; });
@@ -2076,7 +2082,7 @@ wgWrap.addEventListener("pointerdown", ev => {
       moved = true; freezeWidgets(); ox = w.offsetLeft; oy = w.offsetTop;
       w.classList.add("dragging"); w.style.zIndex = ++wgZ; closeBurst(); hideQL(true);
     }
-    w.style.left = (ox+dx)+"px"; w.style.top = (oy+dy)+"px";
+    const k = WS(); w.style.left = (ox+dx/k)+"px"; w.style.top = (oy+dy/k)+"px";
     trashHot(overTrash(e.clientX, e.clientY));
   };
   const up = e => {
