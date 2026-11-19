@@ -1267,6 +1267,7 @@ desktopItems.forEach((it, i) => {
 });
 function openItem(it, origin){
   closeBurst(); hideQL(true);
+  if (it.key === "design") return openDump(it.el.querySelector(".art"));
   if (it.kind === "folder") openFinder(it.key, origin);
   else openDoc(it.file, origin);
 }
