@@ -11,6 +11,7 @@ im daiwik khedekar. 16, ceo of [pythe](https://www.pythe.app), your ai cofounder
 - **the desktop** (`src/desktop.html`): folders that burst open on hover, markdown files you can quick look, a terminal, spotlight (`⌘K`), a dock with my socials, and an iphone home screen when youre on mobile
 - **weather widget**: live london weather from open-meteo. current temp, high and low, next five hours
 - **move stuff**: drag the widgets anywhere, drag icons or widgets onto the trash, put them back from the trash
+- **cool design stuff**: click the folder and all my posters whirlpool out. drag them, fling them, click one to look closer
 - **the logo**: hover the P in the middle of the wallpaper
 - **music widget**: plays the #1 larping playlist for real through spotify's embed player. play, pause, skip, auto next. signed into spotify = full songs, otherwise 30 sec previews
 - **static pages** (`content/`): every page also exists as plain html so search engines and ai models can read it
