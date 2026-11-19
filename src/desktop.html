@@ -1489,7 +1489,7 @@ function navTo(W, key, noHist){
 
 /* Markdown documents */
 function openDoc(file, origin){
-  const W = createWin({ id:"doc-"+file.name, title:file.name, app:"Preview", w:600, h:470, origin });
+  const W = createWin({ id:"doc-"+file.name, title:file.name, app:"Preview", w:540, h:420, origin });
   if (W.built) return;
   W.built = true;
   const src = mdOf(file);
@@ -1618,7 +1618,7 @@ function updateDockRunning(){
 let BASE = 46;
 function setDockBase(){
   const items = [...dock.querySelectorAll(".dk")];
-  BASE = Math.max(34, Math.min(46, (innerWidth - 60) / (items.length + 1) - 4));
+  BASE = Math.max(32, Math.min(innerWidth >= 1800 ? 44 : 40, (innerWidth - 60) / (items.length + 1) - 4));
   items.forEach(i => i.style.setProperty("--s", BASE+"px"));
 }
 setDockBase(); addEventListener("resize", setDockBase);
