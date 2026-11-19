@@ -579,6 +579,33 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .icon .art svg[viewBox="0 0 42 52"]{width:29px}
 .icon .label{font-size:10.5px;max-width:74px}
 .tagdot{top:40px;right:16px;width:7px;height:7px}
+/* ===== Cool Design Stuff: lean, click me, and the dump ===== */
+
+#dump{position:fixed;inset:0;z-index:9800;overflow:hidden;touch-action:none;color:#fff;
+  background:radial-gradient(circle at 50% 55%,rgba(48,52,110,.55),rgba(6,7,20,.9) 75%);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
+  animation:dzIn .35s ease-out}
+#dump.bye{opacity:0;transition:opacity .45s ease-in .1s}
+@keyframes dzIn{from{opacity:0}}
+.dz-head{position:absolute;left:max(22px,env(safe-area-inset-left,0px));top:18px;display:grid;gap:3px;pointer-events:none;z-index:2}
+.dz-head b{font:700 22px/1.1 var(--font-display);letter-spacing:-.01em}
+.dz-head span{font-size:12px;opacity:.7}
+.dz-x{position:absolute;top:16px;right:max(16px,env(safe-area-inset-right,0px));z-index:100000;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#111;
+  background:rgba(255,255,255,.92);box-shadow:0 8px 24px rgba(0,0,0,.4);transition:transform .2s}
+.dz-x:hover{transform:scale(1.08) rotate(90deg)}
+.dz-x svg{width:18px;height:18px}
+.dz-whirl{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:100000;padding:9px 16px;border-radius:20px;cursor:pointer;font-size:12.5px;font-weight:600;color:#fff;
+  background:rgba(255,255,255,.14);box-shadow:inset 0 .5px 0 rgba(255,255,255,.35),0 8px 24px rgba(0,0,0,.35);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.dz-whirl:hover{background:rgba(255,255,255,.22)}
+.dz-card{position:absolute;left:0;top:0;width:var(--cw);aspect-ratio:4/5;padding:0;border-radius:10px;overflow:hidden;cursor:grab;will-change:transform;touch-action:none;
+  box-shadow:0 18px 40px rgba(0,0,0,.5),0 0 0 .5px rgba(255,255,255,.18);transition:opacity .3s,filter .3s}
+.dz-card:active{cursor:grabbing}
+.dz-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none}
+#dump.focusing .dz-card:not(.on){opacity:.12;filter:blur(2px)}
+#dump.focusing .dz-whirl{opacity:0;pointer-events:none}
+.dz-cap{position:absolute;left:0;right:0;bottom:20px;text-align:center;z-index:100000;pointer-events:none;opacity:0;transition:opacity .25s}
+#dump.focusing .dz-cap{opacity:1}
+.dz-cap b{display:block;font:700 15px/1.2 var(--font-display)}
+.dz-cap span{font-size:11.5px;opacity:.7}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1742,6 +1769,143 @@ addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === " ")){ e.preventDefault(); openSpot(); }
   if (e.key === "Escape"){ closeMenus(); closeBurst(); hideQL(); }
 });
+
+/* ============ Cool Design Stuff: the dump ============ */
+/* Click the folder and every poster whirlpools out of it. Drag, fling, click one to look closer, X or esc to leave. */
+const designPosters = () => FOLDERS.design.files.filter(f => !isSub(f)).map(f => { const m = mdOf(f); return {
+  img: firstImg(f), title: (m.match(/^# (.+)$/m) || [])[1] || f.name.replace(/\.md$/,""), meta: ((m.match(/<div class="meta">([^<]+)<\/div>/) || [])[1] || "").replace(/^poster · /, "") }; });
+let DZ = null;
+function openDump(fromEl){
+  if (DZ) return;
+  closeBurst(true); hideQL(true); closeMenus();
+  const posters = designPosters();
+  const o = el("div"); o.id = "dump"; o.setAttribute("role","dialog"); o.setAttribute("aria-modal","true"); o.setAttribute("aria-label","Cool Design Stuff");
+  o.innerHTML = `<div class="dz-head"><b>cool design stuff</b><span>${posters.length} posters · drag them, fling them, click one</span></div>
+    <button class="dz-x" aria-label="Close"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
+    <button class="dz-whirl">whirl again</button><div class="dz-cap" aria-live="polite"></div>`;
+  document.body.appendChild(o);
+  const fr = fromEl?.getBoundingClientRect();
+  const origin = fr ? [fr.left + fr.width/2, fr.top + fr.height/2] : [innerWidth/2, innerHeight/2];
+  let cw = 0, ch = 0, z = 1, mouse = [innerWidth/2, innerHeight/2];
+  const size = () => {
+    const n = posters.length, W = innerWidth, H = innerHeight - 110, cols = Math.ceil(Math.sqrt(n * W / H)), rows = Math.ceil(n / cols);
+    cw = Math.round(Math.max(96, Math.min(240, W / cols * .78, H / rows * .78 * .8))); ch = cw * 1.25;
+    o.style.setProperty("--cw", cw + "px");
+    return { cols, rows, W, H };
+  };
+  const scatter = () => {
+    const { cols, rows, W, H } = size(), cells = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([c, r]);
+    cells.sort(() => Math.random() - .5);
+    return posters.map((_, i) => { const [c, r] = cells[i], cwid = W / cols, chei = H / rows;
+      return [ (c + .5 + (Math.random() - .5) * .45) * cwid, 70 + (r + .5 + (Math.random() - .5) * .4) * chei, (Math.random() - .5) * 22 ]; });
+  };
+  const cards = posters.map((p, i) => {
+    const b = el("button","dz-card",`<img src="${p.img}" alt="${esc(p.title)} poster" draggable="false">`);
+    b.setAttribute("aria-label", `${p.title} ${p.meta}`); o.insertBefore(b, $(".dz-x", o));
+    return { p, el:b, x:origin[0], y:origin[1], r:0, s:.15, vx:0, vy:0, vr:0, phase:Math.random()*6.3, depth:.4 + Math.random()*.9 };
+  });
+  DZ = { o, cards, mode:"intro", focus:null, drag:null, raf:0, t0:performance.now() };
+  const whirl = () => {
+    const T = scatter(), C = [innerWidth/2, innerHeight/2 + 20];
+    cards.forEach((c, i) => {
+      const dx = T[i][0] - C[0], dy = T[i][1] - C[1];
+      c.home = null; c.from = [c.x, c.y, c.r, c.s]; c.to = T[i];
+      c.R = Math.hypot(dx, dy); c.th = Math.atan2(dy, dx); c.delay = i * 55; c.vx = c.vy = c.vr = 0;
+    });
+    DZ.C = C; DZ.mode = "intro"; DZ.t0 = performance.now();
+  };
+  const focusCard = c => {
+    if (DZ.focus) unfocus();
+    DZ.focus = c; c.home = [c.x, c.y, c.r]; c.vx = c.vy = c.vr = 0; c.el.classList.add("on"); c.el.style.zIndex = ++z + 1000;
+    o.classList.add("focusing");
+    $(".dz-cap", o).innerHTML = `<b>${esc(c.p.title)}</b><span>${esc(c.p.meta)} · ← → to flip · esc to go back</span>`;
+  };
+  function unfocus(){ const c = DZ.focus; if (!c) return; c.el.classList.remove("on"); c.returning = true; DZ.focus = null; o.classList.remove("focusing"); }
+  const close = () => {
+    if (!DZ || DZ.mode === "outro") return;
+    unfocus(); DZ.mode = "outro"; DZ.t0 = performance.now();
+    cards.forEach(c => c.from = [c.x, c.y, c.r, c.s]);
+    o.classList.add("bye"); removeEventListener("keydown", onKey, true); removeEventListener("resize", onResize);
+    setTimeout(() => { cancelAnimationFrame(DZ.raf); o.remove(); DZ = null; (fromEl || document.body).focus?.(); }, reduce ? 10 : 600);
+  };
+  const onKey = e => {
+    if (e.key === "Escape"){ e.stopPropagation(); DZ.focus ? unfocus() : close(); }
+    if (DZ.focus && (e.key === "ArrowRight" || e.key === "ArrowLeft")){ const i = cards.indexOf(DZ.focus), n = cards.length; focusCard(cards[(i + (e.key === "ArrowRight" ? 1 : n - 1)) % n]); }
+  };
+  const onResize = () => { size(); };
+  addEventListener("keydown", onKey, true); addEventListener("resize", onResize);
+  $(".dz-x", o).onclick = close;
+  $(".dz-whirl", o).onclick = () => { unfocus(); whirl(); };
+  o.addEventListener("pointermove", e => { mouse = [e.clientX, e.clientY]; });
+  o.addEventListener("click", e => { if (e.target === o && DZ.focus) unfocus(); });
+  cards.forEach(c => {
+    c.el.addEventListener("pointerdown", e => {
+      if (DZ.mode !== "free") return;
+      if (DZ.focus === c){ unfocus(); return; }
+      if (DZ.focus) unfocus();
+      c.returning = false;
+      c.el.setPointerCapture(e.pointerId); c.el.style.zIndex = ++z;
+      DZ.drag = { c, dx:e.clientX - c.x, dy:e.clientY - c.y, lx:e.clientX, ly:e.clientY, lt:performance.now(), moved:false, sx:e.clientX, sy:e.clientY };
+    });
+    c.el.addEventListener("pointermove", e => {
+      const d = DZ?.drag; if (!d || d.c !== c) return;
+      if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) > 4) d.moved = true;
+      const now = performance.now(), dt = Math.max(1, now - d.lt);
+      c.vx = c.vx * .5 + (e.clientX - d.lx) / dt * 16 * .5; c.vy = c.vy * .5 + (e.clientY - d.ly) / dt * 16 * .5;
+      c.x = e.clientX - d.dx; c.y = e.clientY - d.dy; c.vr = c.vx * .35;
+      d.lx = e.clientX; d.ly = e.clientY; d.lt = now;
+    });
+    const end = () => { const d = DZ?.drag; if (!d || d.c !== c) return; DZ.drag = null; if (!d.moved) focusCard(c); };
+    c.el.addEventListener("pointerup", end); c.el.addEventListener("pointercancel", end);
+  });
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(48, now - last) / 16.67; last = now;
+    const W = innerWidth, H = innerHeight, mode = DZ.mode;
+    let introDone = true;
+    cards.forEach(c => {
+      let bob = 0, rb = 0, px = 0, py = 0;
+      if (mode === "intro"){
+        const t = reduce ? 1 : Math.min(1, Math.max(0, (now - DZ.t0 - c.delay) / 1500)), e = ease(t), C = DZ.C;
+        if (t < 1) introDone = false;
+        const ang = c.th - (1 - e) * Math.PI * 2.6, R = c.R * e, k = (1 - e) * (1 - e);
+        c.x = C[0] + R * Math.cos(ang) + (c.from[0] - C[0]) * k;
+        c.y = C[1] + R * Math.sin(ang) + (c.from[1] - C[1]) * k;
+        c.r = c.to[2] + (1 - e) * 540 + (c.from[2] - c.to[2]) * k; c.s = c.from[3] + (1 - c.from[3]) * e;
+      } else if (mode === "outro"){
+        const e = ease(Math.min(1, (now - DZ.t0) / 520));
+        c.x = c.from[0] + (origin[0] - c.from[0]) * e; c.y = c.from[1] + (origin[1] - c.from[1]) * e;
+        c.r = c.from[2] - e * 400; c.s = c.from[3] * (1 - e * .9);
+      } else {
+        const L = 1 - Math.pow(.82, dt);
+        if (DZ.focus === c){
+          const s = Math.min(H * .78 / ch, W * .8 / cw);
+          c.x += (W/2 - c.x) * L; c.y += (H/2 - 6 - c.y) * L; c.r += (0 - c.r) * L; c.s += (s - c.s) * L;
+        } else {
+          c.s += (1 - c.s) * L;
+          if (c.returning && c.home){
+            c.x += (c.home[0] - c.x) * L; c.y += (c.home[1] - c.y) * L; c.r += (c.home[2] - c.r) * L;
+            if (Math.hypot(c.home[0] - c.x, c.home[1] - c.y) < 1){ c.returning = false; c.home = null; }
+          } else if (DZ.drag?.c !== c){
+            const f = Math.pow(.93, dt);
+            c.x += c.vx * dt; c.y += c.vy * dt; c.r += c.vr * dt * .2; c.vx *= f; c.vy *= f; c.vr *= f;
+            const hw = cw/2, hh = ch/2;
+            if (c.x < hw){ c.x = hw; c.vx = Math.abs(c.vx) * .6; } if (c.x > W - hw){ c.x = W - hw; c.vx = -Math.abs(c.vx) * .6; }
+            if (c.y < hh + 10){ c.y = hh + 10; c.vy = Math.abs(c.vy) * .6; } if (c.y > H - hh){ c.y = H - hh; c.vy = -Math.abs(c.vy) * .6; }
+          }
+          if (!reduce){ bob = Math.sin(now * .0011 + c.phase) * 4; rb = Math.sin(now * .0008 + c.phase) * 1.2; px = (W/2 - mouse[0]) * .012 * c.depth; py = (H/2 - mouse[1]) * .012 * c.depth; }
+        }
+      }
+      c.el.style.transform = `translate(${c.x - cw/2 + px}px,${c.y - ch/2 + bob + py}px) rotate(${c.r + rb}deg) scale(${c.s})`;
+    });
+    if (mode === "intro" && introDone) DZ.mode = "free";
+    DZ.raf = requestAnimationFrame(frame);
+  };
+  whirl(); DZ.raf = requestAnimationFrame(frame);
+  $(".dz-x", o).focus({ preventScroll:true });
+}
 
 /* ============ Widgets ============ */
 const TODOS = [
