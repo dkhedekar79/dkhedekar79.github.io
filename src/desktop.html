@@ -1741,7 +1741,7 @@ function cleanUp(){
 
 /* ============ Spotlight ============ */
 const spotIndex = () => [
-  ...Object.entries(FOLDERS).map(([k,f]) => ({ name:f.name, kind:"Folder", icon:SVG.folder(24), go:()=>openFinder(k) })),
+  ...Object.entries(FOLDERS).map(([k,f]) => ({ name:f.name, kind:"Folder", icon:SVG.folder(24), go:()=> k === "design" ? openDump() : openFinder(k) })),
   ...DESK_FILES.map(f => ({ name:f.name, kind:"Desktop", icon:SVG.mdfile(24), go:()=>openDoc(f) })),
   ...Object.values(FOLDERS).flatMap(F => F.files.filter(f => !isSub(f)).map(f => ({ name:f.name, kind:F.name, icon:SVG.mdfile(24), go:()=>openDoc(f), text:mdOf(f) }))),
   ...DOCK.filter(d=>d.href).map(d => ({ name:d.label, kind:"Link", icon:d.icon, go:()=>{ const a = el("a"); a.href=d.href(); a.target="_blank"; a.rel="noopener"; a.click(); } })),
@@ -2142,7 +2142,7 @@ function buildMobile(){
     .map(([l,ic,k]) => `<a class="m-app" href="${PROFILE.links[k]}" target="_blank" rel="noopener" aria-label="${l}"><span class="mi">${ic}</span></a>`).join("");
   $("#mHello").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
   grid.addEventListener("click", ev => {
-    const f = ev.target.closest("[data-fold]"); if (f) return openMFolder(f.dataset.fold, f.querySelector(".mi"));
+    const f = ev.target.closest("[data-fold]"); if (f) return f.dataset.fold === "design" ? openDump(f.querySelector(".mi")) : openMFolder(f.dataset.fold, f.querySelector(".mi"));
     const d = ev.target.closest("[data-desk]"); if (d) openSheet(DESK_FILES[+d.dataset.desk]);
   });
 }
