@@ -1,6 +1,6 @@
 ---
 title: Design portfolio, Daiwik Khedekar
-description: Posters and brand design by Daiwik Khedekar for Black Box, Loops, Pythe, Railway, Lantern, Sona8, Archal, Litmus, Meteoric, Veeza, Covera and Quivly. Graphic designer for companies since 14.
+description: Posters and brand design by Daiwik Khedekar for Black Box, Loops, Pythe, Railway, Lantern, Sona8, Archal, Litmus, Meteoric, Veeza, Covera, Quivly, Caution and Hop Aero. Graphic designer for companies since 14.
 slug: design
 image: img/design/black-box-try-cutting-a-link.jpg
 ---
@@ -94,5 +94,19 @@ a runner breaking the tape. the tape is the only thing in colour
 ![Quivly poster: everything after you sign](/img/design/quivly-everything-after-you-sign.jpg)
 
 a signature that turns into a growth line. black ink for the deal, green for everything after
+
+## hard to break into.
+<div class="meta">caution</div>
+
+![Caution poster: hard to break into](/img/design/caution-hard-to-break-into.jpg)
+
+caution is hosting for software you cant afford to have hacked. a bridge so covered in locks nobody gets through, and only the red ones get colour
+
+## overnight shipping.
+<div class="meta">hop aero</div>
+
+![Hop Aero poster: overnight shipping](/img/design/hop-aero-overnight-shipping.jpg)
+
+hop aero does rocket cargo delivery to contested environments. overnight shipping, but its a rocket. the fire is the only thing in colour
 
 -dk
