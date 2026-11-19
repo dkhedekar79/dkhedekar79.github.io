@@ -573,6 +573,12 @@ a.wg:hover,button.wg:hover{transform:scale(1.02)}
 .fwgico{display:block;width:46px;height:46px;border-radius:12px;background:linear-gradient(160deg,#4c5bd8,#1f2550);box-shadow:inset 0 .5px 0 rgba(255,255,255,.4),0 2px 6px rgba(0,0,0,.2)}
 /* ===== Compact pass: laptop screens read less zoomed in ===== */
 #widgets{transform:scale(var(--ws,.8));transform-origin:0 0}
+.icon{width:76px;gap:2px}
+.icon .art{width:46px;height:46px}
+.icon .art svg{width:42px}
+.icon .art svg[viewBox="0 0 42 52"]{width:29px}
+.icon .label{font-size:10.5px;max-width:74px}
+.tagdot{top:40px;right:16px;width:7px;height:7px}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1171,7 +1177,7 @@ desktopItems.forEach((it, idx) => {
 });
 function layoutIcons(){
   const W = innerWidth, H = innerHeight - 28 - 100;
-  const cell = W < 760 ? 86 : 90, colW = W < 760 ? 84 : 88;
+  const cell = W < 760 ? 80 : 80, colW = W < 760 ? 78 : 80;
   const rows = Math.max(1, Math.floor((H - 10) / cell));
   const inset = W < 760 ? 14 : Math.round(Math.min(150, Math.max(60, W * .07)));
   const used = Math.min(rows, desktopItems.length);
